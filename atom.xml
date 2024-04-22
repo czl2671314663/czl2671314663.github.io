@@ -30,32 +30,6 @@
   </entry>
   
   <entry>
-    <title>简单实用小脚本（python遍历文件夹）</title>
-    <link href="http://example.com/2023/12/29/python%E5%B0%8F%E8%84%9A%E6%9C%AC/"/>
-    <id>http://example.com/2023/12/29/python%E5%B0%8F%E8%84%9A%E6%9C%AC/</id>
-    <published>2023-12-29T00:49:33.000Z</published>
-    <updated>2023-12-29T01:17:48.856Z</updated>
-    
-    <content type="html"><![CDATA[<p>#python遍历文件夹</p><pre><code>import shutilimport os#搜索指定文件夹下的所有mp4文件，把搜索到的视频文件全部移动到指定的位置path = r&quot;E:\Program Files (x86)\Steam\steamapps\workshop\content\431960&quot;#搜索某个文件夹下的所有mp4文件move_path = r&quot;E:\qqqq&quot; #把搜索出来的mp4移动到的位置if os.path.isdir(move_path): #目的文件夹不存在就创建    passelse:    os.mkdir(move_path) def dfs(dir_name):#深度遍历    try:        for i in os.listdir(dir_name):#遍历子目录            full_path=os.path.join(dir_name,i)#路径合并            if(full_path.endswith(&#39;.mp4&#39;)):#文件名以mp4结尾                print(full_path)#mp4文件的具体路径                print(os.path.dirname(full_path))#视频文件的父目录                shutil.copy(full_path,move_path)#把目标文件移到目的位置            if os.path.isdir(dir_name) :#如果是目录，进行递归遍历                dfs(dir_name+&#39;/&#39;+i) #递归遍历下一级子目录    except:        passif __name__ == &#39;__main__&#39;:    dfs(path)</code></pre>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;p&gt;#python遍历文件夹&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;import shutil
-import os
-
-#搜索指定文件夹下的所有mp4文件，把搜索到的视频文件全部移动到指定的位置
-
-path = r&amp;quot;E:&#92;Program Files (x86)&#92;Steam&#92;st</summary>
-      
-    
-    
-    
-    
-  </entry>
-  
-  <entry>
     <title>python数据清洗并上传数据库</title>
     <link href="http://example.com/2023/12/29/python%E6%95%B0%E6%8D%AE%E6%B8%85%E6%B4%97%E4%B8%8A%E4%BC%A0%E6%95%B0%E6%8D%AE%E5%BA%93/"/>
     <id>http://example.com/2023/12/29/python%E6%95%B0%E6%8D%AE%E6%B8%85%E6%B4%97%E4%B8%8A%E4%BC%A0%E6%95%B0%E6%8D%AE%E5%BA%93/</id>
@@ -69,6 +43,34 @@ path = r&amp;quot;E:&#92;Program Files (x86)&#92;Steam&#92;st</summary>
       
     <summary type="html">&lt;p&gt;#python数据清洗并上传数据库&lt;br&gt;实现的功能是把多个excel的数据进行清洗（主要是对excel的表头进行替换后插入到不同的表中去），实现逻辑是把配置表的表头转化为字典进行替换。&lt;/p&gt;
 &lt;figure class=&quot;highlight plaintext&quot;&gt;&lt;ta</summary>
+      
+    
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>简单实用小脚本（python遍历文件夹）</title>
+    <link href="http://example.com/2023/12/29/python%E5%B0%8F%E8%84%9A%E6%9C%AC/"/>
+    <id>http://example.com/2023/12/29/python%E5%B0%8F%E8%84%9A%E6%9C%AC/</id>
+    <published>2023-12-29T00:49:33.000Z</published>
+    <updated>2024-04-22T10:13:15.956Z</updated>
+    
+    <content type="html"><![CDATA[<p>#python遍历文件夹</p><pre><code>import shutilimport os# 搜索指定文件夹下的所有mp4文件，把搜索到的视频文件全部移动到指定的位置path = r&quot;D:&quot;  # 搜索某个文件夹下的所有mp4文件move_path = r&quot;E:\data&quot;  # 把搜索出来的mp4移动到的位置if os.path.isdir(move_path):  # 目的文件夹不存在就创建    passelse:    os.mkdir(move_path)def dfs(dir_name):  # 深度遍历    try:        for i in os.listdir(dir_name):  # 遍历子目录            full_path = os.path.join(dir_name, i)  # 路径合并            if (full_path.endswith(&#39;.csv&#39;)):  # 文件名以mp4结尾                print(full_path)  # mp4文件的具体路径                print(os.path.dirname(full_path))  # 视频文件的父目录                shutil.copy(full_path, move_path)  # 把目标文件复制到目的位置            if os.path.isdir(dir_name):  # 如果是目录，进行递归遍历                dfs(dir_name + &#39;/&#39; + i)  # 递归遍历下一级子目录    except:        passif __name__ == &#39;__main__&#39;:    dfs(path)</code></pre>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;#python遍历文件夹&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;import shutil
+import os
+
+# 搜索指定文件夹下的所有mp4文件，把搜索到的视频文件全部移动到指定的位置
+
+path = r&amp;quot;D:&amp;quot;  # 搜索某个文件夹下的所有mp4文件
+
+</summary>
       
     
     
