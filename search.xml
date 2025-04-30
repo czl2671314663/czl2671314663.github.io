@@ -45,12 +45,6 @@ if __name__ == &#39;__main__&#39;:
       </tags>
   </entry>
   <entry>
-    <title>20250429test</title>
-    <url>/2025/04/29/20250429test/</url>
-    <content><![CDATA[<h1 id="时隔两年重新写博客！"><a href="#时隔两年重新写博客！" class="headerlink" title="时隔两年重新写博客！"></a>时隔两年重新写博客！</h1><p>这是我的2025第一篇文章，非常开心可以继续更新我的博客啦！</p>
-]]></content>
-  </entry>
-  <entry>
     <title>帆软报表批量替换工具（附GUI界面）</title>
     <url>/2025/04/30/%E5%B8%86%E8%BD%AF%E6%8A%A5%E8%A1%A8%E6%89%B9%E9%87%8F%E6%9B%BF%E6%8D%A2/</url>
     <content><![CDATA[<p>本文介绍一个使用 Python 编写的 <strong>帆软报表批量替换工具</strong>，支持 <code>.fvs</code>、<code>.cpt</code>、<code>.frm</code> 等格式，具备图形化界面、配置文件导入导出、替换规则管理等功能。<br><a href="/%E5%B8%86%E8%BD%AF%E6%8A%A5%E8%A1%A8%E6%89%B9%E9%87%8F%E6%9B%BF%E6%8D%A2.exe">点击下载 EXE 工具</a></p>
@@ -81,5 +75,11 @@ if __name__ == &#39;__main__&#39;:
         <tag>GUI</tag>
         <tag>报表</tag>
       </tags>
+  </entry>
+  <entry>
+    <title>20250429test</title>
+    <url>/2025/04/29/20250429test/</url>
+    <content><![CDATA[<h1 id="时隔两年重新写博客！"><a href="#时隔两年重新写博客！" class="headerlink" title="时隔两年重新写博客！"></a>时隔两年重新写博客！</h1><p>这是我的2025第一篇文章，非常开心可以继续更新我的博客啦！</p>
+]]></content>
   </entry>
 </search>
