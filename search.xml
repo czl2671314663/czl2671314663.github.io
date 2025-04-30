@@ -1,6 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>20250429test</title>
+    <url>/2025/04/29/20250429test/</url>
+    <content><![CDATA[<h1 id="时隔两年重新写博客！"><a href="#时隔两年重新写博客！" class="headerlink" title="时隔两年重新写博客！"></a>时隔两年重新写博客！</h1><p>这是我的2025第一篇文章，非常开心可以继续更新我的博客啦！</p>
+]]></content>
+  </entry>
+  <entry>
+    <title>帆软报表批量替换工具（附GUI界面）</title>
+    <url>/2025/04/30/%E5%B8%86%E8%BD%AF%E6%8A%A5%E8%A1%A8%E6%89%B9%E9%87%8F%E6%9B%BF%E6%8D%A2/</url>
+    <content><![CDATA[<p>本文介绍一个使用 Python 编写的 <strong>帆软报表批量替换工具</strong>，支持 <code>.fvs</code>、<code>.cpt</code>、<code>.frm</code> 等格式，具备图形化界面、配置文件导入导出、替换规则管理等功能。<br><a href="/%E5%B8%86%E8%BD%AF%E6%8A%A5%E8%A1%A8%E6%89%B9%E9%87%8F%E6%9B%BF%E6%8D%A2.exe">点击下载 EXE 工具</a></p>
+<h2 id="📌-功能特性"><a href="#📌-功能特性" class="headerlink" title="📌 功能特性"></a>📌 功能特性</h2><ul>
+<li>支持 <code>.fvs</code>（压缩包）、<code>.cpt</code>、<code>.frm</code> 等报表文件格式；</li>
+<li>可批量对报表中字符串进行替换；</li>
+<li>替换规则支持按行精确处理 JavaScript 代码；</li>
+<li>图形化操作界面（Tkinter）；</li>
+<li>支持导入导出 JSON 格式配置文件；</li>
+<li>替换记录可视化展示。</li>
+</ul>
+<hr>
+<h2 id="💡-使用说明"><a href="#💡-使用说明" class="headerlink" title="💡 使用说明"></a>💡 使用说明</h2><ol>
+<li>运行脚本后，将弹出图形界面；</li>
+<li>添加替换规则（支持多个）；<br><img src="/images/IMG20250430-110936355.jpeg" alt="配置文件截图"></li>
+<li>加载 <code>.fvs</code>、<code>.cpt</code> 或 <code>.frm</code> 报表文件；</li>
+<li>选择输出目录；</li>
+<li>点击“开始处理”自动完成替换；</li>
+<li>支持配置文件导入和导出。<br><img src="/images/IMG20250430-1106381.jpeg" alt="工具界面截图"></li>
+</ol>
+]]></content>
+      <categories>
+        <category>编程工具</category>
+      </categories>
+      <tags>
+        <tag>Python</tag>
+        <tag>自动化工具</tag>
+        <tag>GUI</tag>
+        <tag>报表</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>搜索并移动CSV文件的Python脚本</title>
     <url>/2025/04/30/python%E9%81%8D%E5%8E%86%E6%96%87%E4%BB%B6%E5%A4%B9/</url>
     <content><![CDATA[<p>在日常数据处理或项目开发中，我们经常需要将特定类型的文件（如 <code>.csv</code>、<code>.mp4</code> 等）从多个目录中提取出来，集中到一个指定目录下。下面是一个用 Python 实现的简单脚本，它会递归遍历某个文件夹中的所有子文件夹，并将所有 <code>.csv</code> 文件复制到你指定的文件夹中。<br><a href="/%E9%81%8D%E5%8E%86%E6%96%87%E4%BB%B6%E5%A4%B9.exe">点击下载 EXE 工具</a></p>
@@ -43,43 +81,5 @@ if __name__ == &#39;__main__&#39;:
         <tag>文件操作</tag>
         <tag>自动化脚本</tag>
       </tags>
-  </entry>
-  <entry>
-    <title>帆软报表批量替换工具（附GUI界面）</title>
-    <url>/2025/04/30/%E5%B8%86%E8%BD%AF%E6%8A%A5%E8%A1%A8%E6%89%B9%E9%87%8F%E6%9B%BF%E6%8D%A2/</url>
-    <content><![CDATA[<p>本文介绍一个使用 Python 编写的 <strong>帆软报表批量替换工具</strong>，支持 <code>.fvs</code>、<code>.cpt</code>、<code>.frm</code> 等格式，具备图形化界面、配置文件导入导出、替换规则管理等功能。<br><a href="/%E5%B8%86%E8%BD%AF%E6%8A%A5%E8%A1%A8%E6%89%B9%E9%87%8F%E6%9B%BF%E6%8D%A2.exe">点击下载 EXE 工具</a></p>
-<h2 id="📌-功能特性"><a href="#📌-功能特性" class="headerlink" title="📌 功能特性"></a>📌 功能特性</h2><ul>
-<li>支持 <code>.fvs</code>（压缩包）、<code>.cpt</code>、<code>.frm</code> 等报表文件格式；</li>
-<li>可批量对报表中字符串进行替换；</li>
-<li>替换规则支持按行精确处理 JavaScript 代码；</li>
-<li>图形化操作界面（Tkinter）；</li>
-<li>支持导入导出 JSON 格式配置文件；</li>
-<li>替换记录可视化展示。</li>
-</ul>
-<hr>
-<h2 id="💡-使用说明"><a href="#💡-使用说明" class="headerlink" title="💡 使用说明"></a>💡 使用说明</h2><ol>
-<li>运行脚本后，将弹出图形界面；</li>
-<li>添加替换规则（支持多个）；<br><img src="/images/IMG20250430-110936355.jpeg" alt="配置文件截图"></li>
-<li>加载 <code>.fvs</code>、<code>.cpt</code> 或 <code>.frm</code> 报表文件；</li>
-<li>选择输出目录；</li>
-<li>点击“开始处理”自动完成替换；</li>
-<li>支持配置文件导入和导出。<br><img src="/images/IMG20250430-1106381.jpeg" alt="工具界面截图"></li>
-</ol>
-]]></content>
-      <categories>
-        <category>编程工具</category>
-      </categories>
-      <tags>
-        <tag>Python</tag>
-        <tag>自动化工具</tag>
-        <tag>GUI</tag>
-        <tag>报表</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>20250429test</title>
-    <url>/2025/04/29/20250429test/</url>
-    <content><![CDATA[<h1 id="时隔两年重新写博客！"><a href="#时隔两年重新写博客！" class="headerlink" title="时隔两年重新写博客！"></a>时隔两年重新写博客！</h1><p>这是我的2025第一篇文章，非常开心可以继续更新我的博客啦！</p>
-]]></content>
   </entry>
 </search>
