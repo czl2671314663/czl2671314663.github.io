@@ -3,7 +3,7 @@
   <entry>
     <title>遍历文件夹Python脚本</title>
     <url>/2025/04/30/python%E9%81%8D%E5%8E%86%E6%96%87%E4%BB%B6%E5%A4%B9/</url>
-    <content><![CDATA[<p>在日常数据处理或项目开发中，我们经常需要将特定类型的文件（如 <code>.csv</code>、<code>.mp4</code> 等）从多个目录中提取出来，集中到一个指定目录下。<br>下面是一个用 Python 实现的简单脚本，它会递归遍历某个文件夹中的所有子文件夹，并将所有 <code>输入格式</code> 文件复制到你指定的文件夹中。<br><a href="/%E9%81%8D%E5%8E%86%E6%96%87%E4%BB%B6%E5%A4%B9.exe">点击下载 EXE 工具</a><br>2025-05-06更新:<br>新增多选选项<br>新增选择文件夹路径选项<br>新增多选文件后缀<br>新增GUI界面<br>遍历后将数据复制到当前文件夹data文件夹下面<br><a href="/%E9%81%8D%E5%8E%86%E6%96%87%E4%BB%B6%E5%A4%B9%E6%96%87%E4%BB%B6.exe">点击下载 EXE 工具</a></p>
+    <content><![CDATA[<p>在日常数据处理或项目开发中，我们经常需要将特定类型的文件（如 <code>.csv</code>、<code>.mp4</code> 等）从多个目录中提取出来，集中到一个指定目录下。<br>下面是一个用 Python 实现的简单脚本，它会递归遍历某个文件夹中的所有子文件夹，并将所有 <code>输入格式</code> 文件复制到你指定的文件夹中。<br><a href="/%E9%81%8D%E5%8E%86%E6%96%87%E4%BB%B6%E5%A4%B9.exe">点击下载 EXE 工具旧版</a><br>2025-05-06更新:<br>新增多选选项<br>新增选择文件夹路径选项<br>新增多选文件后缀<br>新增GUI界面<br>遍历后将数据复制到当前文件夹data文件夹下面<br><a href="/%E9%81%8D%E5%8E%86%E6%96%87%E4%BB%B6%E5%A4%B9%E6%96%87%E4%BB%B6.exe">点击下载 EXE 工具新版</a></p>
 ]]></content>
       <categories>
         <category>编程工具</category>
@@ -12,6 +12,15 @@
         <tag>Python</tag>
         <tag>文件操作</tag>
         <tag>自动化脚本</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>20250429test</title>
+    <url>/2025/04/29/20250429test/</url>
+    <content><![CDATA[<h1 id="时隔两年重新写博客！"><a href="#时隔两年重新写博客！" class="headerlink" title="时隔两年重新写博客！"></a>时隔两年重新写博客！</h1><p>这是我的2025第一篇文章，非常开心可以继续更新我的博客啦！</p>
+]]></content>
+      <tags>
+        <tag>随记</tag>
       </tags>
   </entry>
   <entry>
@@ -44,15 +53,6 @@
         <tag>自动化工具</tag>
         <tag>GUI</tag>
         <tag>报表</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>20250429test</title>
-    <url>/2025/04/29/20250429test/</url>
-    <content><![CDATA[<h1 id="时隔两年重新写博客！"><a href="#时隔两年重新写博客！" class="headerlink" title="时隔两年重新写博客！"></a>时隔两年重新写博客！</h1><p>这是我的2025第一篇文章，非常开心可以继续更新我的博客啦！</p>
-]]></content>
-      <tags>
-        <tag>随记</tag>
       </tags>
   </entry>
 </search>
