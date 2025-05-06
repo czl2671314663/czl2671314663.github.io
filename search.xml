@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>20250429test</title>
-    <url>/2025/04/29/20250429test/</url>
-    <content><![CDATA[<h1 id="时隔两年重新写博客！"><a href="#时隔两年重新写博客！" class="headerlink" title="时隔两年重新写博客！"></a>时隔两年重新写博客！</h1><p>这是我的2025第一篇文章，非常开心可以继续更新我的博客啦！</p>
+    <title>遍历文件夹Python脚本</title>
+    <url>/2025/04/30/python%E9%81%8D%E5%8E%86%E6%96%87%E4%BB%B6%E5%A4%B9/</url>
+    <content><![CDATA[<p>在日常数据处理或项目开发中，我们经常需要将特定类型的文件（如 <code>.csv</code>、<code>.mp4</code> 等）从多个目录中提取出来，集中到一个指定目录下。<br>下面是一个用 Python 实现的简单脚本，它会递归遍历某个文件夹中的所有子文件夹，并将所有 <code>输入格式</code> 文件复制到你指定的文件夹中。<br><a href="/%E9%81%8D%E5%8E%86%E6%96%87%E4%BB%B6%E5%A4%B9.exe">点击下载 EXE 工具</a><br>2025-05-06更新:<br>新增多选选项<br>新增选择文件夹路径选项<br>新增多选文件后缀<br>新增GUI界面<br>遍历后将数据复制到当前文件夹data文件夹下面<br><a href="/%E9%81%8D%E5%8E%86%E6%96%87%E4%BB%B6%E5%A4%B9%E6%96%87%E4%BB%B6.exe">点击下载 EXE 工具</a></p>
 ]]></content>
+      <categories>
+        <category>编程工具</category>
+      </categories>
+      <tags>
+        <tag>Python</tag>
+        <tag>文件操作</tag>
+        <tag>自动化脚本</tag>
+      </tags>
   </entry>
   <entry>
     <title>帆软报表批量替换工具（附GUI界面）</title>
@@ -39,47 +47,12 @@
       </tags>
   </entry>
   <entry>
-    <title>搜索并移动CSV文件的Python脚本</title>
-    <url>/2025/04/30/python%E9%81%8D%E5%8E%86%E6%96%87%E4%BB%B6%E5%A4%B9/</url>
-    <content><![CDATA[<p>在日常数据处理或项目开发中，我们经常需要将特定类型的文件（如 <code>.csv</code>、<code>.mp4</code> 等）从多个目录中提取出来，集中到一个指定目录下。下面是一个用 Python 实现的简单脚本，它会递归遍历某个文件夹中的所有子文件夹，并将所有 <code>.csv</code> 文件复制到你指定的文件夹中。<br><a href="/%E9%81%8D%E5%8E%86%E6%96%87%E4%BB%B6%E5%A4%B9.exe">点击下载 EXE 工具</a></p>
-<h2 id="💻-脚本代码如下："><a href="#💻-脚本代码如下：" class="headerlink" title="💻 脚本代码如下："></a>💻 脚本代码如下：</h2><pre><code class="language-python">import shutil
-import os
-
-# 搜索指定文件夹下的所有csv文件，并移动到目标文件夹
-
-path = r&quot;D:&quot;  # 搜索的根目录
-
-move_path = r&quot;E:\data&quot;  # 目标目录，用于存放所有csv文件
-
-if os.path.isdir(move_path):
-    pass
-else:
-    os.mkdir(move_path)
-
-def dfs(dir_name):  # 深度遍历函数
-    try:
-        for i in os.listdir(dir_name):
-            full_path = os.path.join(dir_name, i)
-            if full_path.endswith(&#39;.csv&#39;):  # 只处理.csv文件
-                print(full_path)
-                print(os.path.dirname(full_path))
-                shutil.copy(full_path, move_path)  # 复制文件到目标目录
-            if os.path.isdir(full_path):  # 如果是目录，继续递归
-                dfs(full_path)
-    except:
-        pass
-
-if __name__ == &#39;__main__&#39;:
-    dfs(path)
-</code></pre>
+    <title>20250429test</title>
+    <url>/2025/04/29/20250429test/</url>
+    <content><![CDATA[<h1 id="时隔两年重新写博客！"><a href="#时隔两年重新写博客！" class="headerlink" title="时隔两年重新写博客！"></a>时隔两年重新写博客！</h1><p>这是我的2025第一篇文章，非常开心可以继续更新我的博客啦！</p>
 ]]></content>
-      <categories>
-        <category>编程工具</category>
-      </categories>
       <tags>
-        <tag>Python</tag>
-        <tag>文件操作</tag>
-        <tag>自动化脚本</tag>
+        <tag>随记</tag>
       </tags>
   </entry>
 </search>
