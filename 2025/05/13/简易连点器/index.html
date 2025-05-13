@@ -1,0 +1,338 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>简易连点器 | TAT东云川TAT</title><meta name="author" content="东云川"><meta name="copyright" content="东云川"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="点击下载 EXE 工具 import pyautoguiimport timeimport keyboardimport threadingfrom tkinter import * class AutoClickerGUI:    def init(self, master):        self.master &#x3D; master        master.title(“Pytho">
+<meta property="og:type" content="article">
+<meta property="og:title" content="简易连点器">
+<meta property="og:url" content="http://example.com/2025/05/13/%E7%AE%80%E6%98%93%E8%BF%9E%E7%82%B9%E5%99%A8/index.html">
+<meta property="og:site_name" content="TAT东云川TAT">
+<meta property="og:description" content="点击下载 EXE 工具 import pyautoguiimport timeimport keyboardimport threadingfrom tkinter import * class AutoClickerGUI:    def init(self, master):        self.master &#x3D; master        master.title(“Pytho">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://images.unsplash.com/photo-1745679506345-2504663d7631?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D">
+<meta property="article:published_time" content="2025-05-13T08:43:47.000Z">
+<meta property="article:modified_time" content="2025-05-13T08:45:32.420Z">
+<meta property="article:author" content="东云川">
+<meta property="article:tag" content="Python">
+<meta property="article:tag" content="自动化工具">
+<meta property="article:tag" content="GUI">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://images.unsplash.com/photo-1745679506345-2504663d7631?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "简易连点器",
+  "url": "http://example.com/2025/05/13/%E7%AE%80%E6%98%93%E8%BF%9E%E7%82%B9%E5%99%A8/",
+  "image": "https://images.unsplash.com/photo-1745679506345-2504663d7631?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  "datePublished": "2025-05-13T08:43:47.000Z",
+  "dateModified": "2025-05-13T08:45:32.420Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "东云川",
+      "url": "http://example.com/%E4%B8%9C%E4%BA%91%E5%B7%9D"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2025/05/13/%E7%AE%80%E6%98%93%E8%BF%9E%E7%82%B9%E5%99%A8/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":-1,"unescape":true,"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '简易连点器',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://images.unsplash.com/photo-1745679506345-2504663d7631?q=80&amp;w=3087&amp;auto=format&amp;fit=crop&amp;ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">4</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">7</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(https://images.unsplash.com/photo-1745750747233-c09276a878b3?q=80&amp;w=3125&amp;auto=format&amp;fit=crop&amp;ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">TAT东云川TAT</span></a><a class="nav-page-title" href="/"><span class="site-name">简易连点器</span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">简易连点器</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-05-13T08:43:47.000Z" title="发表于 2025-05-13 16:43:47">2025-05-13</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-05-13T08:45:32.420Z" title="更新于 2025-05-13 16:45:32">2025-05-13</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E7%BC%96%E7%A8%8B%E5%B7%A5%E5%85%B7/">编程工具</a></span></div><div class="meta-secondline"></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p><a href="/%E7%AE%80%E6%98%93%E8%BF%9E%E7%82%B9%E5%99%A8.exe">点击下载 EXE 工具</a></p>
+<p>import pyautogui<br>import time<br>import keyboard<br>import threading<br>from tkinter import *</p>
+<p>class AutoClickerGUI:<br>    def <strong>init</strong>(self, master):<br>        self.master &#x3D; master<br>        master.title(“Python 连点器”)</p>
+<pre><code>    self.is_clicking = False
+    self.click_thread = None
+    
+    # 间隔时间设置
+    Label(master, text=&quot;点击间隔(秒):&quot;).grid(row=0, column=0)
+    self.interval_entry = Entry(master)
+    self.interval_entry.insert(0, &quot;0.1&quot;)
+    self.interval_entry.grid(row=0, column=1)
+    
+    # 鼠标按钮选择
+    Label(master, text=&quot;鼠标按钮:&quot;).grid(row=1, column=0)
+    self.button_var = StringVar(value=&quot;left&quot;)
+    Radiobutton(master, text=&quot;左键&quot;, variable=self.button_var, value=&quot;left&quot;).grid(row=1, column=1)
+    Radiobutton(master, text=&quot;右键&quot;, variable=self.button_var, value=&quot;right&quot;).grid(row=1, column=2)
+    
+    # 开始热键设置
+    Label(master, text=&quot;开始热键:&quot;).grid(row=2, column=0)
+    self.start_key_entry = Entry(master)
+    self.start_key_entry.insert(0, &quot;f6&quot;)
+    self.start_key_entry.grid(row=2, column=1)
+    
+    # 停止热键设置
+    Label(master, text=&quot;停止热键:&quot;).grid(row=3, column=0)
+    self.stop_key_entry = Entry(master)
+    self.stop_key_entry.insert(0, &quot;f8&quot;)
+    self.stop_key_entry.grid(row=3, column=1)
+    
+    # 开始/停止按钮
+    self.start_button = Button(master, text=&quot;开始 (F6)&quot;, command=self.toggle_clicking)
+    self.start_button.grid(row=4, column=0, columnspan=3)
+    
+    # 状态标签
+    self.status_label = Label(master, text=&quot;准备就绪 (按 F6 开始 / F8 停止)&quot;, fg=&quot;blue&quot;)
+    self.status_label.grid(row=5, column=0, columnspan=3)
+    
+    # 启动热键监听
+    self.start_hotkey_listener()
+
+def start_hotkey_listener(self):
+    &quot;&quot;&quot;监听开始/停止热键&quot;&quot;&quot;
+    def check_hotkeys():
+        while True:
+            start_key = self.start_key_entry.get().lower()
+            stop_key = self.stop_key_entry.get().lower()
+            
+            if keyboard.is_pressed(start_key):
+                if not self.is_clicking:
+                    self.master.after(0, self.toggle_clicking)
+            if keyboard.is_pressed(stop_key):
+                if self.is_clicking:
+                    self.master.after(0, self.toggle_clicking)
+            time.sleep(0.1)
+    
+    listener_thread = threading.Thread(target=check_hotkeys, daemon=True)
+    listener_thread.start()
+
+def toggle_clicking(self):
+    if not self.is_clicking:
+        # 开始连点
+        try:
+            interval = float(self.interval_entry.get())
+            button = self.button_var.get()
+            
+            if interval &lt;= 0:
+                raise ValueError(&quot;间隔时间必须大于0&quot;)
+            
+            self.is_clicking = True
+            self.start_button.config(text=&quot;停止 (F8)&quot;)
+            self.status_label.config(text=&quot;运行中...按 &quot; + self.stop_key_entry.get() + &quot; 停止&quot;, fg=&quot;green&quot;)
+            
+            # 在新线程中运行连点器
+            self.click_thread = threading.Thread(
+                target=self.auto_clicker,
+                args=(interval, button),
+                daemon=True
+            )
+            self.click_thread.start()
+            
+        except ValueError as e:
+            self.status_label.config(text=f&quot;错误: &#123;str(e)&#125;&quot;, fg=&quot;red&quot;)
+    else:
+        # 停止连点
+        self.is_clicking = False
+        self.start_button.config(text=&quot;开始 (F6)&quot;)
+        self.status_label.config(text=&quot;已停止 (按 F6 开始)&quot;, fg=&quot;blue&quot;)
+
+def auto_clicker(self, interval, button):
+    try:
+        while self.is_clicking:
+            pyautogui.click(button=button)
+            time.sleep(interval)
+    except Exception as e:
+        self.master.after(0, lambda: self.status_label.config(text=f&quot;错误: &#123;str(e)&#125;&quot;, fg=&quot;red&quot;))
+        self.master.after(0, self.toggle_clicking)
+</code></pre>
+<p>if <strong>name</strong> &#x3D;&#x3D; “<strong>main</strong>“:<br>    root &#x3D; Tk()<br>    gui &#x3D; AutoClickerGUI(root)<br>    root.mainloop()</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="东云川">东云川</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2025/05/13/%E7%AE%80%E6%98%93%E8%BF%9E%E7%82%B9%E5%99%A8/">http://example.com/2025/05/13/%E7%AE%80%E6%98%93%E8%BF%9E%E7%82%B9%E5%99%A8/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="http://example.com" target="_blank">TAT东云川TAT</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Python/">Python</a><a class="post-meta__tags" href="/tags/%E8%87%AA%E5%8A%A8%E5%8C%96%E5%B7%A5%E5%85%B7/">自动化工具</a><a class="post-meta__tags" href="/tags/GUI/">GUI</a></div><div class="post-share"><div class="social-share" data-image="https://images.unsplash.com/photo-1745679506345-2504663d7631?q=80&amp;w=3087&amp;auto=format&amp;fit=crop&amp;ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button"><i class="fas fa-qrcode"></i>感谢支持</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="/images/alipay.jpg" target="_blank"><img class="post-qr-code-img" src="/images/alipay.jpg" alt="alipay"/></a><div class="post-qr-code-desc">alipay</div></li></ul></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2025/04/30/%E5%B8%86%E8%BD%AF%E6%8A%A5%E8%A1%A8%E6%89%B9%E9%87%8F%E6%9B%BF%E6%8D%A2/" title="帆软报表批量替换工具（附GUI界面）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">帆软报表批量替换工具（附GUI界面）</div></div><div class="info-2"><div class="info-item-1">本文介绍一个使用 Python 编写的 帆软报表批量替换工具，支持 .fvs、.cpt、.frm 等格式，具备图形化界面、配置文件导入导出、替换规则管理等功能。点击下载 EXE 工具 📌 功能特性 支持 .fvs（压缩包）、.cpt、.frm 等报表文件格式； 可批量对报表中字符串进行替换； 替换规则支持按行精确处理 JavaScript 代码； 图形化操作界面（Tkinter）； 支持导入导出 JSON 格式配置文件； 替换记录可视化展示。   💡 使用说明 运行脚本后，将弹出图形界面； 添加替换规则（支持多个）； 加载 .fvs、.cpt 或 .frm 报表文件； 选择输出目录； 点击“开始处理”自动完成替换； 支持配置文件导入和导出。  </div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/04/30/%E5%B8%86%E8%BD%AF%E6%8A%A5%E8%A1%A8%E6%89%B9%E9%87%8F%E6%9B%BF%E6%8D%A2/" title="帆软报表批量替换工具（附GUI界面）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-04-30</div><div class="info-item-2">帆软报表批量替换工具（附GUI界面）</div></div><div class="info-2"><div class="info-item-1">本文介绍一个使用 Python 编写的 帆软报表批量替换工具，支持 .fvs、.cpt、.frm 等格式，具备图形化界面、配置文件导入导出、替换规则管理等功能。点击下载 EXE 工具 📌 功能特性 支持 .fvs（压缩包）、.cpt、.frm 等报表文件格式； 可批量对报表中字符串进行替换； 替换规则支持按行精确处理 JavaScript 代码； 图形化操作界面（Tkinter）； 支持导入导出 JSON 格式配置文件； 替换记录可视化展示。   💡 使用说明 运行脚本后，将弹出图形界面； 添加替换规则（支持多个）； 加载 .fvs、.cpt 或 .frm 报表文件； 选择输出目录； 点击“开始处理”自动完成替换； 支持配置文件导入和导出。  </div></div></div></a><a class="pagination-related" href="/2025/04/30/python%E9%81%8D%E5%8E%86%E6%96%87%E4%BB%B6%E5%A4%B9/" title="遍历文件夹Python脚本"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-04-30</div><div class="info-item-2">遍历文件夹Python脚本</div></div><div class="info-2"><div class="info-item-1">在日常数据处理或项目开发中，我们经常需要将特定类型的文件（如 .csv、.mp4 等）从多个目录中提取出来，集中到一个指定目录下。下面是一个用 Python 实现的简单脚本，它会递归遍历某个文件夹中的所有子文件夹，并将所有 输入格式 文件复制到你指定的文件夹中。点击下载 EXE 工具旧版2025-05-06更新:新增多选选项新增选择文件夹路径选项新增多选文件后缀新增GUI界面遍历后将数据复制到当前文件夹data文件夹下面点击下载 EXE 工具新版 </div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://images.unsplash.com/photo-1745679506345-2504663d7631?q=80&amp;w=3087&amp;auto=format&amp;fit=crop&amp;ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">东云川</div><div class="author-info-description">这里是东云川的博客</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">4</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">7</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/czl2671314663"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/czl2671314663" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">冲冲冲,gogogo</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/05/13/%E7%AE%80%E6%98%93%E8%BF%9E%E7%82%B9%E5%99%A8/" title="简易连点器">简易连点器</a><time datetime="2025-05-13T08:43:47.000Z" title="发表于 2025-05-13 16:43:47">2025-05-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/04/30/%E5%B8%86%E8%BD%AF%E6%8A%A5%E8%A1%A8%E6%89%B9%E9%87%8F%E6%9B%BF%E6%8D%A2/" title="帆软报表批量替换工具（附GUI界面）">帆软报表批量替换工具（附GUI界面）</a><time datetime="2025-04-30T13:00:00.000Z" title="发表于 2025-04-30 21:00:00">2025-04-30</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/04/30/python%E9%81%8D%E5%8E%86%E6%96%87%E4%BB%B6%E5%A4%B9/" title="遍历文件夹Python脚本">遍历文件夹Python脚本</a><time datetime="2025-04-30T12:30:00.000Z" title="发表于 2025-04-30 20:30:00">2025-04-30</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/04/29/20250429test/" title="20250429test">20250429test</a><time datetime="2025-04-29T06:52:54.000Z" title="发表于 2025-04-29 14:52:54">2025-04-29</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;2025 By 东云川</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.4.0-b1</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'dark' : 'light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : { 'data-mapping': (option && option['data-mapping']) || 'pathname' }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'czl2671314663/blog-comments',
+      'data-repo-id': 'R_kgDOOiHhHw',
+      'data-category-id': 'DIC_kwDOOiHhH84CpnxF',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索一下试试~" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js"></script></div></div></body></html>

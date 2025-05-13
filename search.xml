@@ -1,29 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>遍历文件夹Python脚本</title>
-    <url>/2025/04/30/python%E9%81%8D%E5%8E%86%E6%96%87%E4%BB%B6%E5%A4%B9/</url>
-    <content><![CDATA[<p>在日常数据处理或项目开发中，我们经常需要将特定类型的文件（如 <code>.csv</code>、<code>.mp4</code> 等）从多个目录中提取出来，集中到一个指定目录下。<br>下面是一个用 Python 实现的简单脚本，它会递归遍历某个文件夹中的所有子文件夹，并将所有 <code>输入格式</code> 文件复制到你指定的文件夹中。<br><a href="/%E9%81%8D%E5%8E%86%E6%96%87%E4%BB%B6%E5%A4%B9.exe">点击下载 EXE 工具旧版</a><br>2025-05-06更新:<br>新增多选选项<br>新增选择文件夹路径选项<br>新增多选文件后缀<br>新增GUI界面<br>遍历后将数据复制到当前文件夹data文件夹下面<br><a href="/%E9%81%8D%E5%8E%86%E6%96%87%E4%BB%B6%E5%A4%B9%E6%96%87%E4%BB%B6.exe">点击下载 EXE 工具新版</a></p>
-]]></content>
-      <categories>
-        <category>编程工具</category>
-      </categories>
-      <tags>
-        <tag>Python</tag>
-        <tag>文件操作</tag>
-        <tag>自动化脚本</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>20250429test</title>
-    <url>/2025/04/29/20250429test/</url>
-    <content><![CDATA[<h1 id="时隔两年重新写博客！"><a href="#时隔两年重新写博客！" class="headerlink" title="时隔两年重新写博客！"></a>时隔两年重新写博客！</h1><p>这是我的2025第一篇文章，非常开心可以继续更新我的博客啦！</p>
-]]></content>
-      <tags>
-        <tag>随记</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>帆软报表批量替换工具（附GUI界面）</title>
     <url>/2025/04/30/%E5%B8%86%E8%BD%AF%E6%8A%A5%E8%A1%A8%E6%89%B9%E9%87%8F%E6%9B%BF%E6%8D%A2/</url>
     <content><![CDATA[<p>本文介绍一个使用 Python 编写的 <strong>帆软报表批量替换工具</strong>，支持 <code>.fvs</code>、<code>.cpt</code>、<code>.frm</code> 等格式，具备图形化界面、配置文件导入导出、替换规则管理等功能。<br><a href="/%E5%B8%86%E8%BD%AF%E6%8A%A5%E8%A1%A8%E6%89%B9%E9%87%8F%E6%9B%BF%E6%8D%A2.exe">点击下载 EXE 工具</a></p>
@@ -53,6 +30,141 @@
         <tag>自动化工具</tag>
         <tag>GUI</tag>
         <tag>报表</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>20250429test</title>
+    <url>/2025/04/29/20250429test/</url>
+    <content><![CDATA[<h1 id="时隔两年重新写博客！"><a href="#时隔两年重新写博客！" class="headerlink" title="时隔两年重新写博客！"></a>时隔两年重新写博客！</h1><p>这是我的2025第一篇文章，非常开心可以继续更新我的博客啦！</p>
+]]></content>
+      <tags>
+        <tag>随记</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>简易连点器</title>
+    <url>/2025/05/13/%E7%AE%80%E6%98%93%E8%BF%9E%E7%82%B9%E5%99%A8/</url>
+    <content><![CDATA[<p><a href="/%E7%AE%80%E6%98%93%E8%BF%9E%E7%82%B9%E5%99%A8.exe">点击下载 EXE 工具</a></p>
+<p>import pyautogui<br>import time<br>import keyboard<br>import threading<br>from tkinter import *</p>
+<p>class AutoClickerGUI:<br>    def <strong>init</strong>(self, master):<br>        self.master &#x3D; master<br>        master.title(“Python 连点器”)</p>
+<pre><code>    self.is_clicking = False
+    self.click_thread = None
+    
+    # 间隔时间设置
+    Label(master, text=&quot;点击间隔(秒):&quot;).grid(row=0, column=0)
+    self.interval_entry = Entry(master)
+    self.interval_entry.insert(0, &quot;0.1&quot;)
+    self.interval_entry.grid(row=0, column=1)
+    
+    # 鼠标按钮选择
+    Label(master, text=&quot;鼠标按钮:&quot;).grid(row=1, column=0)
+    self.button_var = StringVar(value=&quot;left&quot;)
+    Radiobutton(master, text=&quot;左键&quot;, variable=self.button_var, value=&quot;left&quot;).grid(row=1, column=1)
+    Radiobutton(master, text=&quot;右键&quot;, variable=self.button_var, value=&quot;right&quot;).grid(row=1, column=2)
+    
+    # 开始热键设置
+    Label(master, text=&quot;开始热键:&quot;).grid(row=2, column=0)
+    self.start_key_entry = Entry(master)
+    self.start_key_entry.insert(0, &quot;f6&quot;)
+    self.start_key_entry.grid(row=2, column=1)
+    
+    # 停止热键设置
+    Label(master, text=&quot;停止热键:&quot;).grid(row=3, column=0)
+    self.stop_key_entry = Entry(master)
+    self.stop_key_entry.insert(0, &quot;f8&quot;)
+    self.stop_key_entry.grid(row=3, column=1)
+    
+    # 开始/停止按钮
+    self.start_button = Button(master, text=&quot;开始 (F6)&quot;, command=self.toggle_clicking)
+    self.start_button.grid(row=4, column=0, columnspan=3)
+    
+    # 状态标签
+    self.status_label = Label(master, text=&quot;准备就绪 (按 F6 开始 / F8 停止)&quot;, fg=&quot;blue&quot;)
+    self.status_label.grid(row=5, column=0, columnspan=3)
+    
+    # 启动热键监听
+    self.start_hotkey_listener()
+
+def start_hotkey_listener(self):
+    &quot;&quot;&quot;监听开始/停止热键&quot;&quot;&quot;
+    def check_hotkeys():
+        while True:
+            start_key = self.start_key_entry.get().lower()
+            stop_key = self.stop_key_entry.get().lower()
+            
+            if keyboard.is_pressed(start_key):
+                if not self.is_clicking:
+                    self.master.after(0, self.toggle_clicking)
+            if keyboard.is_pressed(stop_key):
+                if self.is_clicking:
+                    self.master.after(0, self.toggle_clicking)
+            time.sleep(0.1)
+    
+    listener_thread = threading.Thread(target=check_hotkeys, daemon=True)
+    listener_thread.start()
+
+def toggle_clicking(self):
+    if not self.is_clicking:
+        # 开始连点
+        try:
+            interval = float(self.interval_entry.get())
+            button = self.button_var.get()
+            
+            if interval &lt;= 0:
+                raise ValueError(&quot;间隔时间必须大于0&quot;)
+            
+            self.is_clicking = True
+            self.start_button.config(text=&quot;停止 (F8)&quot;)
+            self.status_label.config(text=&quot;运行中...按 &quot; + self.stop_key_entry.get() + &quot; 停止&quot;, fg=&quot;green&quot;)
+            
+            # 在新线程中运行连点器
+            self.click_thread = threading.Thread(
+                target=self.auto_clicker,
+                args=(interval, button),
+                daemon=True
+            )
+            self.click_thread.start()
+            
+        except ValueError as e:
+            self.status_label.config(text=f&quot;错误: &#123;str(e)&#125;&quot;, fg=&quot;red&quot;)
+    else:
+        # 停止连点
+        self.is_clicking = False
+        self.start_button.config(text=&quot;开始 (F6)&quot;)
+        self.status_label.config(text=&quot;已停止 (按 F6 开始)&quot;, fg=&quot;blue&quot;)
+
+def auto_clicker(self, interval, button):
+    try:
+        while self.is_clicking:
+            pyautogui.click(button=button)
+            time.sleep(interval)
+    except Exception as e:
+        self.master.after(0, lambda: self.status_label.config(text=f&quot;错误: &#123;str(e)&#125;&quot;, fg=&quot;red&quot;))
+        self.master.after(0, self.toggle_clicking)
+</code></pre>
+<p>if <strong>name</strong> &#x3D;&#x3D; “<strong>main</strong>“:<br>    root &#x3D; Tk()<br>    gui &#x3D; AutoClickerGUI(root)<br>    root.mainloop()</p>
+]]></content>
+      <categories>
+        <category>编程工具</category>
+      </categories>
+      <tags>
+        <tag>Python</tag>
+        <tag>自动化工具</tag>
+        <tag>GUI</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>遍历文件夹Python脚本</title>
+    <url>/2025/04/30/python%E9%81%8D%E5%8E%86%E6%96%87%E4%BB%B6%E5%A4%B9/</url>
+    <content><![CDATA[<p>在日常数据处理或项目开发中，我们经常需要将特定类型的文件（如 <code>.csv</code>、<code>.mp4</code> 等）从多个目录中提取出来，集中到一个指定目录下。<br>下面是一个用 Python 实现的简单脚本，它会递归遍历某个文件夹中的所有子文件夹，并将所有 <code>输入格式</code> 文件复制到你指定的文件夹中。<br><a href="/%E9%81%8D%E5%8E%86%E6%96%87%E4%BB%B6%E5%A4%B9.exe">点击下载 EXE 工具旧版</a><br>2025-05-06更新:<br>新增多选选项<br>新增选择文件夹路径选项<br>新增多选文件后缀<br>新增GUI界面<br>遍历后将数据复制到当前文件夹data文件夹下面<br><a href="/%E9%81%8D%E5%8E%86%E6%96%87%E4%BB%B6%E5%A4%B9%E6%96%87%E4%BB%B6.exe">点击下载 EXE 工具新版</a></p>
+]]></content>
+      <categories>
+        <category>编程工具</category>
+      </categories>
+      <tags>
+        <tag>Python</tag>
+        <tag>文件操作</tag>
+        <tag>自动化脚本</tag>
       </tags>
   </entry>
 </search>
