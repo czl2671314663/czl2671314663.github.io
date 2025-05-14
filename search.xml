@@ -1,6 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>简易连点器</title>
+    <url>/2025/05/13/%E7%AE%80%E6%98%93%E8%BF%9E%E7%82%B9%E5%99%A8/</url>
+    <content><![CDATA[<h1 id="简易连点器-——-用-Python-打造属于你的自动点击工具"><a href="#简易连点器-——-用-Python-打造属于你的自动点击工具" class="headerlink" title="简易连点器 —— 用 Python 打造属于你的自动点击工具"></a>简易连点器 —— 用 Python 打造属于你的自动点击工具</h1><blockquote>
+<p>发布日期：2025-05-13<br>标签：<code>Python</code> <code>自动化工具</code> <code>GUI</code><br>分类：编程工具  </p>
+<p><a href="/%E7%AE%80%E6%98%93%E8%BF%9E%E7%82%B9%E5%99%A8.exe">点击下载 EXE 工具</a></p>
+</blockquote>
+<hr>
+<p>你是否曾因重复点击游戏按钮或频繁操作办公软件而疲惫不堪？今天带来一个实用的小工具 —— <strong>Python 简易连点器</strong>，它能够根据你的设置自动点击鼠标，彻底解放你的双手。</p>
+<p>这个小工具拥有简洁直观的图形界面，无需编程基础也能轻松使用。无论是游戏挂机、软件测试，还是网页自动刷新，都能派上用场。</p>
+<hr>
+<h2 id="🛠-工具功能概览"><a href="#🛠-工具功能概览" class="headerlink" title="🛠 工具功能概览"></a>🛠 工具功能概览</h2><ul>
+<li>✅ 支持左键&#x2F;右键点击  </li>
+<li>✅ 自定义点击间隔（单位：秒）  </li>
+<li>✅ 可设置启动与停止热键（默认：F6 启动，F8 停止）  </li>
+<li>✅ 支持后台运行，不打断你正常使用电脑  </li>
+<li>✅ 可打包为 EXE，双击即可运行，无需 Python 环境</li>
+</ul>
+<hr>
+<h2 id="💻-图形界面展示"><a href="#💻-图形界面展示" class="headerlink" title="💻 图形界面展示"></a>💻 图形界面展示</h2><p>启动工具后，你将看到一个简单直观的窗口界面，主要包括以下几个部分：</p>
+<ol>
+<li><strong>点击间隔</strong>：设置每次点击之间的延迟，单位为秒。比如 <code>0.1</code> 表示每秒点击约 10 次。  </li>
+<li><strong>鼠标按钮</strong>：选择是使用鼠标左键还是右键进行自动点击。  </li>
+<li><strong>热键设置</strong>：可自定义“开始”和“停止”自动点击的快捷键。默认启动热键为 F6，停止为 F8。  </li>
+<li><strong>状态提示</strong>：实时显示当前工具的运行状态，例如“准备就绪”、“运行中”、“已停止”等。</li>
+</ol>
+<hr>
+<h2 id="🧩-实现核心代码解析"><a href="#🧩-实现核心代码解析" class="headerlink" title="🧩 实现核心代码解析"></a>🧩 实现核心代码解析</h2><p>以下是该工具的核心代码片段，使用 <code>tkinter</code> 构建图形界面，<code>pyautogui</code> 控制鼠标点击，<code>keyboard</code> 用于监听热键，<code>threading</code> 实现多线程不阻塞界面：</p>
+<hr>
+<p>🧪 使用说明<br><a href="/%E7%AE%80%E6%98%93%E8%BF%9E%E7%82%B9%E5%99%A8.exe">下载并运行：点击此处下载 EXE 版本</a></p>
+<p>设置点击参数：根据需要输入点击间隔、选择按钮类型。</p>
+<p>启动热键监听：程序启动后自动生效。</p>
+<p>开始自动点击：按下设定的启动热键（默认 F6），开始自动点击。</p>
+<p>停止点击操作：按下停止热键（默认 F8）即可终止点击过程。</p>
+<p>⚠️ 注意事项<br>本工具会模拟真实的鼠标点击行为，请勿在敏感操作场景（如关闭系统、交易确认等）中使用，以免误操作。</p>
+<p>请确保运行环境中已安装 Python 并配置了所需依赖：</p>
+<p>pip install pyautogui keyboard<br>（如果你下载的是 EXE 版本，无需手动安装）</p>
+<p>如果遇到快捷键无效的情况，尝试以管理员身份运行程序。</p>
+<p>鼠标点击时尽量避免频率过高，部分系统或程序可能检测为异常行为。</p>
+<p>以下是完整代码:</p>
+<pre>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">import pyautogui</span><br><span class="line">import time</span><br><span class="line">import keyboard</span><br><span class="line">import threading</span><br><span class="line">from tkinter import *</span><br><span class="line"></span><br><span class="line">class AutoClickerGUI:</span><br><span class="line">    def __init__(self, master):</span><br><span class="line">        self.master = master</span><br><span class="line">        master.title(&quot;Python 连点器&quot;)</span><br><span class="line">        </span><br><span class="line">        self.is_clicking = False</span><br><span class="line">        self.click_thread = None</span><br><span class="line">        </span><br><span class="line">        Label(master, text=&quot;点击间隔(秒):&quot;).grid(row=0, column=0)</span><br><span class="line">        self.interval_entry = Entry(master)</span><br><span class="line">        self.interval_entry.insert(0, &quot;0.1&quot;)</span><br><span class="line">        self.interval_entry.grid(row=0, column=1)</span><br><span class="line">        </span><br><span class="line">        Label(master, text=&quot;鼠标按钮:&quot;).grid(row=1, column=0)</span><br><span class="line">        self.button_var = StringVar(value=&quot;left&quot;)</span><br><span class="line">        Radiobutton(master, text=&quot;左键&quot;, variable=self.button_var, value=&quot;left&quot;).grid(row=1, column=1)</span><br><span class="line">        Radiobutton(master, text=&quot;右键&quot;, variable=self.button_var, value=&quot;right&quot;).grid(row=1, column=2)</span><br><span class="line">        </span><br><span class="line">        Label(master, text=&quot;开始热键:&quot;).grid(row=2, column=0)</span><br><span class="line">        self.start_key_entry = Entry(master)</span><br><span class="line">        self.start_key_entry.insert(0, &quot;f6&quot;)</span><br><span class="line">        self.start_key_entry.grid(row=2, column=1)</span><br><span class="line">        </span><br><span class="line">        Label(master, text=&quot;停止热键:&quot;).grid(row=3, column=0)</span><br><span class="line">        self.stop_key_entry = Entry(master)</span><br><span class="line">        self.stop_key_entry.insert(0, &quot;f8&quot;)</span><br><span class="line">        self.stop_key_entry.grid(row=3, column=1)</span><br><span class="line">        </span><br><span class="line">        self.start_button = Button(master, text=&quot;开始 (F6)&quot;, command=self.toggle_clicking)</span><br><span class="line">        self.start_button.grid(row=4, column=0, columnspan=3)</span><br><span class="line">        </span><br><span class="line">        self.status_label = Label(master, text=&quot;准备就绪 (按 F6 开始 / F8 停止)&quot;, fg=&quot;blue&quot;)</span><br><span class="line">        self.status_label.grid(row=5, column=0, columnspan=3)</span><br><span class="line">        </span><br><span class="line">        self.start_hotkey_listener()</span><br><span class="line">    </span><br><span class="line">    def start_hotkey_listener(self):</span><br><span class="line">        def check_hotkeys():</span><br><span class="line">            while True:</span><br><span class="line">                start_key = self.start_key_entry.get().lower()</span><br><span class="line">                stop_key = self.stop_key_entry.get().lower()</span><br><span class="line">                </span><br><span class="line">                if keyboard.is_pressed(start_key):</span><br><span class="line">                    if not self.is_clicking:</span><br><span class="line">                        self.master.after(0, self.toggle_clicking)</span><br><span class="line">                if keyboard.is_pressed(stop_key):</span><br><span class="line">                    if self.is_clicking:</span><br><span class="line">                        self.master.after(0, self.toggle_clicking)</span><br><span class="line">                time.sleep(0.1)</span><br><span class="line">        </span><br><span class="line">        listener_thread = threading.Thread(target=check_hotkeys, daemon=True)</span><br><span class="line">        listener_thread.start()</span><br><span class="line">    </span><br><span class="line">    def toggle_clicking(self):</span><br><span class="line">        if not self.is_clicking:</span><br><span class="line">            try:</span><br><span class="line">                interval = float(self.interval_entry.get())</span><br><span class="line">                button = self.button_var.get()</span><br><span class="line">                </span><br><span class="line">                if interval &lt;= 0:</span><br><span class="line">                    raise ValueError(&quot;间隔时间必须大于0&quot;)</span><br><span class="line">                </span><br><span class="line">                self.is_clicking = True</span><br><span class="line">                self.start_button.config(text=&quot;停止 (F8)&quot;)</span><br><span class="line">                self.status_label.config(text=&quot;运行中...按 &quot; + self.stop_key_entry.get() + &quot; 停止&quot;, fg=&quot;green&quot;)</span><br><span class="line">                </span><br><span class="line">                self.click_thread = threading.Thread(</span><br><span class="line">                    target=self.auto_clicker,</span><br><span class="line">                    args=(interval, button),</span><br><span class="line">                    daemon=True</span><br><span class="line">                )</span><br><span class="line">                self.click_thread.start()</span><br><span class="line">                </span><br><span class="line">            except ValueError as e:</span><br><span class="line">                self.status_label.config(text=f&quot;错误: &#123;str(e)&#125;&quot;, fg=&quot;red&quot;)</span><br><span class="line">        else:</span><br><span class="line">            self.is_clicking = False</span><br><span class="line">            self.start_button.config(text=&quot;开始 (F6)&quot;)</span><br><span class="line">            self.status_label.config(text=&quot;已停止 (按 F6 开始)&quot;, fg=&quot;blue&quot;)</span><br><span class="line">    </span><br><span class="line">    def auto_clicker(self, interval, button):</span><br><span class="line">        try:</span><br><span class="line">            while self.is_clicking:</span><br><span class="line">                pyautogui.click(button=button)</span><br><span class="line">                time.sleep(interval)</span><br><span class="line">        except Exception as e:</span><br><span class="line">            self.master.after(0, lambda: self.status_label.config(text=f&quot;错误: &#123;str(e)&#125;&quot;, fg=&quot;red&quot;))</span><br><span class="line">            self.master.after(0, self.toggle_clicking)</span><br><span class="line"></span><br><span class="line">if __name__ == &quot;__main__&quot;:</span><br><span class="line">    root = Tk()</span><br><span class="line">    gui = AutoClickerGUI(root)</span><br><span class="line">    root.mainloop()</span><br></pre></td></tr></table></figure>
+</pre>]]></content>
+      <categories>
+        <category>编程工具</category>
+      </categories>
+      <tags>
+        <tag>Python</tag>
+        <tag>自动化工具</tag>
+        <tag>GUI</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>20250429test</title>
+    <url>/2025/04/29/20250429test/</url>
+    <content><![CDATA[<h1 id="时隔两年重新写博客！"><a href="#时隔两年重新写博客！" class="headerlink" title="时隔两年重新写博客！"></a>时隔两年重新写博客！</h1><p>这是我的2025第一篇文章，非常开心可以继续更新我的博客啦！</p>
+]]></content>
+      <tags>
+        <tag>随记</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>帆软报表批量替换工具（附GUI界面）</title>
     <url>/2025/04/30/%E5%B8%86%E8%BD%AF%E6%8A%A5%E8%A1%A8%E6%89%B9%E9%87%8F%E6%9B%BF%E6%8D%A2/</url>
     <content><![CDATA[<p>本文介绍一个使用 Python 编写的 <strong>帆软报表批量替换工具</strong>，支持 <code>.fvs</code>、<code>.cpt</code>、<code>.frm</code> 等格式，具备图形化界面、配置文件导入导出、替换规则管理等功能。<br><a href="/%E5%B8%86%E8%BD%AF%E6%8A%A5%E8%A1%A8%E6%89%B9%E9%87%8F%E6%9B%BF%E6%8D%A2.exe">点击下载 EXE 工具</a></p>
@@ -30,127 +91,6 @@
         <tag>自动化工具</tag>
         <tag>GUI</tag>
         <tag>报表</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>20250429test</title>
-    <url>/2025/04/29/20250429test/</url>
-    <content><![CDATA[<h1 id="时隔两年重新写博客！"><a href="#时隔两年重新写博客！" class="headerlink" title="时隔两年重新写博客！"></a>时隔两年重新写博客！</h1><p>这是我的2025第一篇文章，非常开心可以继续更新我的博客啦！</p>
-]]></content>
-      <tags>
-        <tag>随记</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>简易连点器</title>
-    <url>/2025/05/13/%E7%AE%80%E6%98%93%E8%BF%9E%E7%82%B9%E5%99%A8/</url>
-    <content><![CDATA[<p><a href="/%E7%AE%80%E6%98%93%E8%BF%9E%E7%82%B9%E5%99%A8.exe">点击下载 EXE 工具</a></p>
-<p>import pyautogui<br>import time<br>import keyboard<br>import threading<br>from tkinter import *</p>
-<p>class AutoClickerGUI:<br>    def <strong>init</strong>(self, master):<br>        self.master &#x3D; master<br>        master.title(“Python 连点器”)</p>
-<pre><code>    self.is_clicking = False
-    self.click_thread = None
-    
-    # 间隔时间设置
-    Label(master, text=&quot;点击间隔(秒):&quot;).grid(row=0, column=0)
-    self.interval_entry = Entry(master)
-    self.interval_entry.insert(0, &quot;0.1&quot;)
-    self.interval_entry.grid(row=0, column=1)
-    
-    # 鼠标按钮选择
-    Label(master, text=&quot;鼠标按钮:&quot;).grid(row=1, column=0)
-    self.button_var = StringVar(value=&quot;left&quot;)
-    Radiobutton(master, text=&quot;左键&quot;, variable=self.button_var, value=&quot;left&quot;).grid(row=1, column=1)
-    Radiobutton(master, text=&quot;右键&quot;, variable=self.button_var, value=&quot;right&quot;).grid(row=1, column=2)
-    
-    # 开始热键设置
-    Label(master, text=&quot;开始热键:&quot;).grid(row=2, column=0)
-    self.start_key_entry = Entry(master)
-    self.start_key_entry.insert(0, &quot;f6&quot;)
-    self.start_key_entry.grid(row=2, column=1)
-    
-    # 停止热键设置
-    Label(master, text=&quot;停止热键:&quot;).grid(row=3, column=0)
-    self.stop_key_entry = Entry(master)
-    self.stop_key_entry.insert(0, &quot;f8&quot;)
-    self.stop_key_entry.grid(row=3, column=1)
-    
-    # 开始/停止按钮
-    self.start_button = Button(master, text=&quot;开始 (F6)&quot;, command=self.toggle_clicking)
-    self.start_button.grid(row=4, column=0, columnspan=3)
-    
-    # 状态标签
-    self.status_label = Label(master, text=&quot;准备就绪 (按 F6 开始 / F8 停止)&quot;, fg=&quot;blue&quot;)
-    self.status_label.grid(row=5, column=0, columnspan=3)
-    
-    # 启动热键监听
-    self.start_hotkey_listener()
-
-def start_hotkey_listener(self):
-    &quot;&quot;&quot;监听开始/停止热键&quot;&quot;&quot;
-    def check_hotkeys():
-        while True:
-            start_key = self.start_key_entry.get().lower()
-            stop_key = self.stop_key_entry.get().lower()
-            
-            if keyboard.is_pressed(start_key):
-                if not self.is_clicking:
-                    self.master.after(0, self.toggle_clicking)
-            if keyboard.is_pressed(stop_key):
-                if self.is_clicking:
-                    self.master.after(0, self.toggle_clicking)
-            time.sleep(0.1)
-    
-    listener_thread = threading.Thread(target=check_hotkeys, daemon=True)
-    listener_thread.start()
-
-def toggle_clicking(self):
-    if not self.is_clicking:
-        # 开始连点
-        try:
-            interval = float(self.interval_entry.get())
-            button = self.button_var.get()
-            
-            if interval &lt;= 0:
-                raise ValueError(&quot;间隔时间必须大于0&quot;)
-            
-            self.is_clicking = True
-            self.start_button.config(text=&quot;停止 (F8)&quot;)
-            self.status_label.config(text=&quot;运行中...按 &quot; + self.stop_key_entry.get() + &quot; 停止&quot;, fg=&quot;green&quot;)
-            
-            # 在新线程中运行连点器
-            self.click_thread = threading.Thread(
-                target=self.auto_clicker,
-                args=(interval, button),
-                daemon=True
-            )
-            self.click_thread.start()
-            
-        except ValueError as e:
-            self.status_label.config(text=f&quot;错误: &#123;str(e)&#125;&quot;, fg=&quot;red&quot;)
-    else:
-        # 停止连点
-        self.is_clicking = False
-        self.start_button.config(text=&quot;开始 (F6)&quot;)
-        self.status_label.config(text=&quot;已停止 (按 F6 开始)&quot;, fg=&quot;blue&quot;)
-
-def auto_clicker(self, interval, button):
-    try:
-        while self.is_clicking:
-            pyautogui.click(button=button)
-            time.sleep(interval)
-    except Exception as e:
-        self.master.after(0, lambda: self.status_label.config(text=f&quot;错误: &#123;str(e)&#125;&quot;, fg=&quot;red&quot;))
-        self.master.after(0, self.toggle_clicking)
-</code></pre>
-<p>if <strong>name</strong> &#x3D;&#x3D; “<strong>main</strong>“:<br>    root &#x3D; Tk()<br>    gui &#x3D; AutoClickerGUI(root)<br>    root.mainloop()</p>
-]]></content>
-      <categories>
-        <category>编程工具</category>
-      </categories>
-      <tags>
-        <tag>Python</tag>
-        <tag>自动化工具</tag>
-        <tag>GUI</tag>
       </tags>
   </entry>
   <entry>
