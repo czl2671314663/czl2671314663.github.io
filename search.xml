@@ -330,4 +330,873 @@ root.mainloop()
         <tag>自动化工具</tag>
       </tags>
   </entry>
+  <entry>
+    <title>「SQL优化完整指南」从索引到分库分表，19个维度彻底搞懂数据库性能优化</title>
+    <url>/2026/05/09/SQL%E4%BC%98%E5%8C%96%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/</url>
+    <content><![CDATA[<blockquote>
+<p>一篇覆盖索引优化、查询优化、表结构设计、执行计划分析、数据库参数调优、分库分表、缓存策略等全方位内容的 SQL 优化指南，适合后端开发日常查阅和面试复习。</p>
+</blockquote>
+<hr>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ol>
+<li><a href="#%E4%B8%80sql-%E6%89%A7%E8%A1%8C%E5%8E%9F%E7%90%86%E4%B8%8E%E6%80%A7%E8%83%BD%E7%93%B6%E9%A2%88%E5%88%86%E6%9E%90">SQL 执行原理与性能瓶颈分析</a></li>
+<li><a href="#%E4%BA%8C%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96">索引优化</a></li>
+<li><a href="#%E4%B8%89sql-%E8%AF%AD%E5%8F%A5%E4%BC%98%E5%8C%96">SQL 语句优化</a></li>
+<li><a href="#%E5%9B%9B%E8%A1%A8%E7%BB%93%E6%9E%84%E8%AE%BE%E8%AE%A1%E4%BC%98%E5%8C%96">表结构设计优化</a></li>
+<li><a href="#%E4%BA%94%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92%E5%88%86%E6%9E%90explain">执行计划分析（EXPLAIN）</a></li>
+<li><a href="#%E5%85%ADmysql-%E5%8F%82%E6%95%B0%E8%B0%83%E4%BC%98">MySQL 参数调优</a></li>
+<li><a href="#%E4%B8%83%E8%BF%9E%E6%8E%A5%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96">连接查询优化</a></li>
+<li><a href="#%E5%85%AB%E5%AD%90%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96">子查询优化</a></li>
+<li><a href="#%E4%B9%9D%E6%8E%92%E5%BA%8F%E4%B8%8E%E5%88%86%E7%BB%84%E4%BC%98%E5%8C%96">排序与分组优化</a></li>
+<li><a href="#%E5%8D%81%E5%88%86%E9%A1%B5%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96">分页查询优化</a></li>
+<li><a href="#%E5%8D%81%E4%B8%80%E4%BA%8B%E5%8A%A1%E4%B8%8E%E9%94%81%E4%BC%98%E5%8C%96">事务与锁优化</a></li>
+<li><a href="#%E5%8D%81%E4%BA%8C%E5%A4%A7%E6%89%B9%E9%87%8F%E6%95%B0%E6%8D%AE%E6%93%8D%E4%BD%9C%E4%BC%98%E5%8C%96">大批量数据操作优化</a></li>
+<li><a href="#%E5%8D%81%E4%B8%89%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%E7%AD%96%E7%95%A5">分库分表策略</a></li>
+<li><a href="#%E5%8D%81%E5%9B%9B%E8%AF%BB%E5%86%99%E5%88%86%E7%A6%BB%E4%B8%8E%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6">读写分离与主从复制</a></li>
+<li><a href="#%E5%8D%81%E4%BA%94%E7%BC%93%E5%AD%98%E7%AD%96%E7%95%A5">缓存策略</a></li>
+<li><a href="#%E5%8D%81%E5%85%AD%E6%85%A2%E6%9F%A5%E8%AF%A2%E7%9B%91%E6%8E%A7%E4%B8%8E%E5%88%86%E6%9E%90">慢查询监控与分析</a></li>
+<li><a href="#%E5%8D%81%E4%B8%83%E5%B8%B8%E8%A7%81-sql-%E5%8F%8D%E6%A8%A1%E5%BC%8F">常见 SQL 反模式</a></li>
+<li><a href="#%E5%8D%81%E5%85%AB%E5%AE%9E%E6%88%98%E6%A1%88%E4%BE%8B%E5%88%86%E6%9E%90">实战案例分析</a></li>
+<li><a href="#%E5%8D%81%E4%B9%9D%E4%B8%8D%E5%90%8C%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E4%BC%98%E5%8C%96%E5%B7%AE%E5%BC%82">不同数据库的优化差异</a></li>
+</ol>
+<hr>
+<h2 id="一、SQL-执行原理与性能瓶颈分析"><a href="#一、SQL-执行原理与性能瓶颈分析" class="headerlink" title="一、SQL 执行原理与性能瓶颈分析"></a>一、SQL 执行原理与性能瓶颈分析</h2><h3 id="1-1-SQL-执行流程"><a href="#1-1-SQL-执行流程" class="headerlink" title="1.1 SQL 执行流程"></a>1.1 SQL 执行流程</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">客户端 → 连接器 → 查询缓存(8.0已废弃) → 分析器 → 优化器 → 执行器 → 存储引擎</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>说明</th>
+<th>瓶颈</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>连接器</td>
+<td>建立连接、权限验证</td>
+<td>连接数不足、频繁建连</td>
+</tr>
+<tr>
+<td>分析器</td>
+<td>词法分析、语法分析</td>
+<td>复杂 SQL 解析耗 CPU</td>
+</tr>
+<tr>
+<td>优化器</td>
+<td>选择索引、Join顺序、生成执行计划</td>
+<td>统计信息不准导致选错索引</td>
+</tr>
+<tr>
+<td>执行器</td>
+<td>调用存储引擎接口</td>
+<td>I&#x2F;O 瓶颈、锁等待</td>
+</tr>
+<tr>
+<td>存储引擎</td>
+<td>数据读写</td>
+<td>磁盘 I&#x2F;O、Buffer Pool 不足</td>
+</tr>
+</tbody></table>
+<h3 id="1-2-性能瓶颈快速定位"><a href="#1-2-性能瓶颈快速定位" class="headerlink" title="1.2 性能瓶颈快速定位"></a>1.2 性能瓶颈快速定位</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 查看当前正在执行的查询（MySQL）</span></span><br><span class="line"><span class="keyword">SHOW</span> <span class="keyword">FULL</span> PROCESSLIST;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看当前锁等待（MySQL 8.0+）</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> performance_schema.data_lock_waits;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看事务状态</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> information_schema.innodb_trx;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看 Buffer Pool 命中率</span></span><br><span class="line"><span class="keyword">SHOW</span> STATUS <span class="keyword">LIKE</span> <span class="string">&#x27;Innodb_buffer_pool_read_requests&#x27;</span>;</span><br><span class="line"><span class="keyword">SHOW</span> STATUS <span class="keyword">LIKE</span> <span class="string">&#x27;Innodb_buffer_pool_reads&#x27;</span>;</span><br><span class="line"><span class="comment">-- 命中率 = (read_requests - reads) / read_requests * 100%，应 &gt; 99%</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="1-3-性能瓶颈来源排序（按影响程度）"><a href="#1-3-性能瓶颈来源排序（按影响程度）" class="headerlink" title="1.3 性能瓶颈来源排序（按影响程度）"></a>1.3 性能瓶颈来源排序（按影响程度）</h3><ol>
+<li><strong>缺少索引或索引失效</strong> —— 最常见，占 80% 以上</li>
+<li><strong>返回大量数据</strong> —— 未加 LIMIT、SELECT *</li>
+<li><strong>锁争用</strong> —— 长事务、行锁升级为表锁</li>
+<li><strong>频繁 I&#x2F;O</strong> —— Buffer Pool 太小、无索引导致全表扫描</li>
+<li><strong>复杂子查询</strong> —— 未使用 JOIN 替代</li>
+<li><strong>配置不当</strong> —— 默认配置不适合生产环境</li>
+</ol>
+<hr>
+<h2 id="二、索引优化"><a href="#二、索引优化" class="headerlink" title="二、索引优化"></a>二、索引优化</h2><h3 id="2-1-索引类型对比"><a href="#2-1-索引类型对比" class="headerlink" title="2.1 索引类型对比"></a>2.1 索引类型对比</h3><table>
+<thead>
+<tr>
+<th>索引类型</th>
+<th>存储结构</th>
+<th>适用场景</th>
+<th>限制</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>B+Tree</td>
+<td>平衡多路搜索树</td>
+<td>等值查询、范围查询、排序</td>
+<td>最左前缀原则</td>
+</tr>
+<tr>
+<td>Hash</td>
+<td>哈希表</td>
+<td>精确等值查询</td>
+<td>不支持范围查询、排序； Memory&#x2F;NDB 引擎</td>
+</tr>
+<tr>
+<td>Full-Text</td>
+<td>倒排索引</td>
+<td>全文搜索</td>
+<td>分词语言限制</td>
+</tr>
+<tr>
+<td>Spatial (R-Tree)</td>
+<td>R 树</td>
+<td>地理位置查询</td>
+<td>仅 MyISAM&#x2F;InnoDB(5.7+)</td>
+</tr>
+<tr>
+<td>前缀索引</td>
+<td>B+Tree + 前缀</td>
+<td>长字符串列</td>
+<td>无法用于 ORDER BY</td>
+</tr>
+<tr>
+<td>函数索引</td>
+<td>B+Tree(虚拟列)</td>
+<td>函数&#x2F;表达式查询</td>
+<td>MySQL 8.0.13+, PostgreSQL</td>
+</tr>
+</tbody></table>
+<h3 id="2-2-联合索引设计原则-——-最左前缀法则"><a href="#2-2-联合索引设计原则-——-最左前缀法则" class="headerlink" title="2.2 联合索引设计原则 —— 最左前缀法则"></a>2.2 联合索引设计原则 —— 最左前缀法则</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 创建联合索引</span></span><br><span class="line"><span class="keyword">CREATE</span> INDEX idx_a_b_c <span class="keyword">ON</span> users(a, b, c);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 走索引 (匹配 a)</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> a <span class="operator">=</span> <span class="number">1</span> <span class="keyword">AND</span> b <span class="operator">=</span> <span class="number">2</span> <span class="keyword">AND</span> c <span class="operator">=</span> <span class="number">3</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 走索引 (匹配 a, b，跳过 c 部分因为范围查询)</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> a <span class="operator">=</span> <span class="number">1</span> <span class="keyword">AND</span> b <span class="operator">&gt;</span> <span class="number">2</span> <span class="keyword">ORDER</span> <span class="keyword">BY</span> c;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 走索引 (匹配 a)</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> a <span class="operator">=</span> <span class="number">1</span> <span class="keyword">ORDER</span> <span class="keyword">BY</span> b;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ❌ 不走索引 (没有从 a 开始)</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> b <span class="operator">=</span> <span class="number">2</span> <span class="keyword">AND</span> c <span class="operator">=</span> <span class="number">3</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ❌ 不走索引 (没有 a)</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> c <span class="operator">=</span> <span class="number">3</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ⚠️ 部分走索引 (a 走索引，c 不走 — 跳过了 b 导致断档)</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> a <span class="operator">=</span> <span class="number">1</span> <span class="keyword">AND</span> c <span class="operator">=</span> <span class="number">3</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-3-索引字段顺序设计"><a href="#2-3-索引字段顺序设计" class="headerlink" title="2.3 索引字段顺序设计"></a>2.3 索引字段顺序设计</h3><p><strong>高选择性原则：区分度大的列放在最前面</strong></p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 计算区分度</span></span><br><span class="line"><span class="keyword">SELECT</span> </span><br><span class="line">    <span class="built_in">COUNT</span>(<span class="keyword">DISTINCT</span> status) <span class="operator">/</span> <span class="built_in">COUNT</span>(<span class="operator">*</span>) <span class="keyword">AS</span> status_selectivity,   <span class="comment">-- 假设 0.001 (太低)</span></span><br><span class="line">    <span class="built_in">COUNT</span>(<span class="keyword">DISTINCT</span> user_id) <span class="operator">/</span> <span class="built_in">COUNT</span>(<span class="operator">*</span>) <span class="keyword">AS</span> user_id_selectivity, <span class="comment">-- 假设 0.8   (高)</span></span><br><span class="line">    <span class="built_in">COUNT</span>(<span class="keyword">DISTINCT</span> created_at) <span class="operator">/</span> <span class="built_in">COUNT</span>(<span class="operator">*</span>) <span class="keyword">AS</span> time_selectivity  <span class="comment">-- 假设 0.95  (最高)</span></span><br><span class="line"><span class="keyword">FROM</span> orders;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 建议顺序：WHERE 条件中频繁出现且区分度高的列放在前面</span></span><br><span class="line"><span class="comment">-- 如果查询模型是：WHERE user_id = ? AND status = ? AND created_at BETWEEN ? AND ?</span></span><br><span class="line"><span class="comment">-- 最佳索引：idx_user_status_time (user_id, status, created_at)</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>等值查询优先于范围查询</strong></p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ❌ 差：范围条件在中间，后面的列用不上</span></span><br><span class="line">INDEX idx_a_b_c (a, created_at, b, c)</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 好：等值条件在前，范围条件在最后</span></span><br><span class="line">INDEX idx_a_b_c (a, b, created_at, c)</span><br><span class="line"><span class="comment">-- WHERE a = 1 AND b = 2 AND created_at &gt; &#x27;2024-01-01&#x27; </span></span><br><span class="line"><span class="comment">-- → 可以用到 a, b, created_at 三列</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-4-覆盖索引"><a href="#2-4-覆盖索引" class="headerlink" title="2.4 覆盖索引"></a>2.4 覆盖索引</h3><p>避免回表查询，将所需列全部包含在索引中。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ❌ 需要回表：索引只有 user_id，查 name 和 email 需要回表</span></span><br><span class="line"><span class="keyword">SELECT</span> name, email <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> user_id <span class="operator">=</span> <span class="number">100</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 覆盖索引：索引包含所有需要的列</span></span><br><span class="line"><span class="keyword">CREATE</span> INDEX idx_user_cover <span class="keyword">ON</span> users(user_id, name, email);</span><br><span class="line"><span class="comment">-- Extra: Using index （不需要回表）</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>建议</strong>：高频查询尽量设计覆盖索引，但不要盲目覆盖所有列 —— 维护索引也有代价。</p>
+<h3 id="2-5-索引失效场景（避坑大全）"><a href="#2-5-索引失效场景（避坑大全）" class="headerlink" title="2.5 索引失效场景（避坑大全）"></a>2.5 索引失效场景（避坑大全）</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ❌ 1. 对索引列使用函数</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> <span class="type">DATE</span>(created_at) <span class="operator">=</span> <span class="string">&#x27;2024-01-01&#x27;</span>;</span><br><span class="line"><span class="comment">-- ✅ 改成</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> created_at <span class="operator">&gt;=</span> <span class="string">&#x27;2024-01-01&#x27;</span> <span class="keyword">AND</span> created_at <span class="operator">&lt;</span> <span class="string">&#x27;2024-01-02&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ❌ 2. 对索引列做运算</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> age <span class="operator">+</span> <span class="number">10</span> <span class="operator">=</span> <span class="number">30</span>;</span><br><span class="line"><span class="comment">-- ✅ 改成</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> age <span class="operator">=</span> <span class="number">20</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ❌ 3. 隐式类型转换（字符串列用数字查）</span></span><br><span class="line"><span class="comment">-- phone 列是 VARCHAR 类型</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> phone <span class="operator">=</span> <span class="number">13800138000</span>;</span><br><span class="line"><span class="comment">-- ✅ 改成</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> phone <span class="operator">=</span> <span class="string">&#x27;13800138000&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ❌ 4. LIKE 以 % 开头</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> name <span class="keyword">LIKE</span> <span class="string">&#x27;%张三&#x27;</span>;</span><br><span class="line"><span class="comment">-- ✅ 必要时用全文索引，或反向 LIKE 有时可改写为：</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> name <span class="keyword">LIKE</span> <span class="string">&#x27;张三%&#x27;</span>;  <span class="comment">-- 走索引</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- ❌ 5. OR 条件不全是索引列</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="number">1</span> <span class="keyword">OR</span> name <span class="operator">=</span> <span class="string">&#x27;张三&#x27;</span>;  <span class="comment">-- name 无索引 → 全表扫描</span></span><br><span class="line"><span class="comment">-- ✅ 改成 UNION ALL</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="number">1</span></span><br><span class="line"><span class="keyword">UNION</span> <span class="keyword">ALL</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> name <span class="operator">=</span> <span class="string">&#x27;张三&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ❌ 6. NOT IN / NOT EXISTS / != / &lt;&gt; 在大范围时可能不走索引</span></span><br><span class="line"><span class="comment">-- 优化器认为需要扫描大量数据时，会选择全表扫描</span></span><br><span class="line"><span class="comment">-- ✅ 能改写为 IN / EXISTS 则改写，或用范围查询替代</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- ❌ 7. IS NULL / IS NOT NULL 在稀疏索引上效率低</span></span><br><span class="line"><span class="comment">-- ✅ 设置默认值，避免 NULL</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- ❌ 8. 联合索引不满足最左前缀</span></span><br><span class="line">INDEX idx_a_b_c (a, b, c)</span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> t <span class="keyword">WHERE</span> b <span class="operator">=</span> <span class="number">2</span>;  <span class="comment">-- 不走索引</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- ❌ 9. ORDER BY + WHERE 列不是同一索引</span></span><br><span class="line">INDEX idx_a (a)</span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> t <span class="keyword">WHERE</span> a <span class="operator">=</span> <span class="number">1</span> <span class="keyword">ORDER</span> <span class="keyword">BY</span> b;  <span class="comment">-- filesort</span></span><br><span class="line"><span class="comment">-- ✅ 创建 (a, b) 联合索引</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- ❌ 10. 统计信息不准 → 优化器误判</span></span><br><span class="line"><span class="comment">-- ✅ 手动更新统计信息</span></span><br><span class="line">ANALYZE <span class="keyword">TABLE</span> users;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-6-索引设计检查清单"><a href="#2-6-索引设计检查清单" class="headerlink" title="2.6 索引设计检查清单"></a>2.6 索引设计检查清单</h3><table>
+<thead>
+<tr>
+<th>检查项</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>WHERE &#x2F; JOIN &#x2F; ORDER BY &#x2F; GROUP BY 列是否有索引</td>
+<td>高频列必须建索引</td>
+</tr>
+<tr>
+<td>联合索引是否满足最左前缀</td>
+<td>检查 SQL 查询条件顺序</td>
+</tr>
+<tr>
+<td>是否存在冗余索引</td>
+<td><code>(a)</code> 和 <code>(a,b)</code> 冗余，只需 <code>(a,b)</code></td>
+</tr>
+<tr>
+<td>是否存在未使用的索引</td>
+<td><code>sys.schema_unused_indexes</code></td>
+</tr>
+<tr>
+<td>索引选择性是否足够</td>
+<td>区分度 &lt; 10% 的列建议不单独建索引</td>
+</tr>
+<tr>
+<td>每张表索引数量</td>
+<td>建议 ≤ 5-6 个，太多影响写入性能</td>
+</tr>
+<tr>
+<td>是否使用前缀索引</td>
+<td>长 VARCHAR&#x2F;TEXT 列</td>
+</tr>
+</tbody></table>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 查找冗余索引</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> sys.schema_redundant_indexes;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查找未使用的索引</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> sys.schema_unused_indexes;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="三、SQL-语句优化"><a href="#三、SQL-语句优化" class="headerlink" title="三、SQL 语句优化"></a>三、SQL 语句优化</h2><h3 id="3-1-SELECT-问题"><a href="#3-1-SELECT-问题" class="headerlink" title="3.1 SELECT * 问题"></a>3.1 SELECT * 问题</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ❌ 坏习惯</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 只取需要的列</span></span><br><span class="line"><span class="keyword">SELECT</span> id, name, email <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+
+<p><strong>SELECT * 的危害</strong>：</p>
+<ul>
+<li>返回不需要的列 → 网络传输变大</li>
+<li>无法使用覆盖索引 → 必须回表</li>
+<li>表结构变更可能破坏调用方</li>
+<li>大字段（TEXT&#x2F;BLOB）白白传输</li>
+</ul>
+<h3 id="3-2-WHERE-条件优化"><a href="#3-2-WHERE-条件优化" class="headerlink" title="3.2 WHERE 条件优化"></a>3.2 WHERE 条件优化</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ❌ 复杂 OR 条件</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> orders <span class="keyword">WHERE</span> (status <span class="operator">=</span> <span class="string">&#x27;paid&#x27;</span> <span class="keyword">AND</span> amount <span class="operator">&gt;</span> <span class="number">100</span>)</span><br><span class="line">                         <span class="keyword">OR</span> (status <span class="operator">=</span> <span class="string">&#x27;pending&#x27;</span> <span class="keyword">AND</span> created_at <span class="operator">&gt;</span> <span class="string">&#x27;2024-01-01&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 能合并则合并，不能则拆分为 UNION</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> orders <span class="keyword">WHERE</span> status <span class="operator">=</span> <span class="string">&#x27;paid&#x27;</span> <span class="keyword">AND</span> amount <span class="operator">&gt;</span> <span class="number">100</span></span><br><span class="line"><span class="keyword">UNION</span> <span class="keyword">ALL</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> orders <span class="keyword">WHERE</span> status <span class="operator">=</span> <span class="string">&#x27;pending&#x27;</span> <span class="keyword">AND</span> created_at <span class="operator">&gt;</span> <span class="string">&#x27;2024-01-01&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ❌ 负向条件</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> orders <span class="keyword">WHERE</span> status <span class="operator">!=</span> <span class="string">&#x27;cancelled&#x27;</span>;</span><br><span class="line"><span class="comment">-- ✅ 用 IN（如果状态值有限）</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> orders <span class="keyword">WHERE</span> status <span class="keyword">IN</span> (<span class="string">&#x27;pending&#x27;</span>, <span class="string">&#x27;paid&#x27;</span>, <span class="string">&#x27;shipped&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-3-COUNT-优化"><a href="#3-3-COUNT-优化" class="headerlink" title="3.3 COUNT 优化"></a>3.3 COUNT 优化</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ❌ COUNT(column) — 不统计 NULL </span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="built_in">COUNT</span>(name) <span class="keyword">FROM</span> users;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ COUNT(*) / COUNT(1) — 效率相同，统计所有行</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="built_in">COUNT</span>(<span class="operator">*</span>) <span class="keyword">FROM</span> users;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 近似计数（大数据量，不需要精确值）</span></span><br><span class="line"><span class="comment">-- MySQL: SHOW TABLE STATUS LIKE &#x27;users&#x27;;  -- 查看 Rows 列，近似值</span></span><br><span class="line"><span class="comment">-- EXPLAIN SELECT COUNT(*) FROM users;  -- 查看 rows 列，估算值</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 精确但高效（利用索引）</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="built_in">COUNT</span>(<span class="operator">*</span>) <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> status <span class="operator">=</span> <span class="string">&#x27;active&#x27;</span>;</span><br><span class="line"><span class="comment">-- 确保 status 有索引</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-4-IN-vs-EXISTS-选择"><a href="#3-4-IN-vs-EXISTS-选择" class="headerlink" title="3.4 IN vs EXISTS 选择"></a>3.4 IN vs EXISTS 选择</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 外表小、子表大 → 用 EXISTS</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> orders o</span><br><span class="line"><span class="keyword">WHERE</span> <span class="keyword">EXISTS</span> (</span><br><span class="line">    <span class="keyword">SELECT</span> <span class="number">1</span> <span class="keyword">FROM</span> users u <span class="keyword">WHERE</span> u.id <span class="operator">=</span> o.user_id <span class="keyword">AND</span> u.vip <span class="operator">=</span> <span class="number">1</span></span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 子表结果集小 → 用 IN</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> orders</span><br><span class="line"><span class="keyword">WHERE</span> user_id <span class="keyword">IN</span> (<span class="keyword">SELECT</span> id <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> vip <span class="operator">=</span> <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- MySQL 8.0+ 优化器已能自动转换，但显式写出仍有帮助</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-5-UNION-vs-UNION-ALL"><a href="#3-5-UNION-vs-UNION-ALL" class="headerlink" title="3.5 UNION vs UNION ALL"></a>3.5 UNION vs UNION ALL</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ❌ UNION — 默认去重，需要额外排序</span></span><br><span class="line"><span class="keyword">SELECT</span> name <span class="keyword">FROM</span> users_2023</span><br><span class="line"><span class="keyword">UNION</span></span><br><span class="line"><span class="keyword">SELECT</span> name <span class="keyword">FROM</span> users_2024;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ UNION ALL — 不去重，性能更高</span></span><br><span class="line"><span class="comment">-- 如果确定无重复（如分区表不同年份），使用 UNION ALL</span></span><br><span class="line"><span class="keyword">SELECT</span> name <span class="keyword">FROM</span> users_2023</span><br><span class="line"><span class="keyword">UNION</span> <span class="keyword">ALL</span></span><br><span class="line"><span class="keyword">SELECT</span> name <span class="keyword">FROM</span> users_2024;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="四、表结构设计优化"><a href="#四、表结构设计优化" class="headerlink" title="四、表结构设计优化"></a>四、表结构设计优化</h2><h3 id="4-1-数据类型选择"><a href="#4-1-数据类型选择" class="headerlink" title="4.1 数据类型选择"></a>4.1 数据类型选择</h3><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>❌ 避免</th>
+<th>✅ 推荐</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>IP 地址</td>
+<td>VARCHAR(15)</td>
+<td>INT UNSIGNED (4字节) &#x2F; INET_ATON()</td>
+<td>更小更快</td>
+</tr>
+<tr>
+<td>日期时间</td>
+<td>VARCHAR</td>
+<td>DATETIME(8字节) &#x2F; TIMESTAMP(4字节)</td>
+<td>原生类型支持函数</td>
+</tr>
+<tr>
+<td>枚举状态</td>
+<td>VARCHAR(20)</td>
+<td>TINYINT &#x2F; ENUM</td>
+<td>1字节 vs 20+字节</td>
+</tr>
+<tr>
+<td>UUID 主键</td>
+<td>VARCHAR(36)</td>
+<td>BINARY(16)</td>
+<td>16字节 vs 36字节</td>
+</tr>
+<tr>
+<td>布尔值</td>
+<td>CHAR(1)</td>
+<td>TINYINT(1)</td>
+<td>1字节</td>
+</tr>
+<tr>
+<td>货币金额</td>
+<td>FLOAT&#x2F;DOUBLE</td>
+<td>DECIMAL(18,2) &#x2F; BIGINT(分)</td>
+<td>避免浮点精度问题</td>
+</tr>
+<tr>
+<td>长文本</td>
+<td>所有都用 TEXT</td>
+<td>VARCHAR 优先 (&lt; 65535)，必要时才用 TEXT</td>
+<td>TEXT 不能有默认值，回表开销大</td>
+</tr>
+<tr>
+<td>手机号</td>
+<td>BIGINT</td>
+<td>CHAR(11)</td>
+<td>手机号不应做运算</td>
+</tr>
+</tbody></table>
+<h3 id="4-2-字段设计规范"><a href="#4-2-字段设计规范" class="headerlink" title="4.2 字段设计规范"></a>4.2 字段设计规范</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ✅ 好的表设计</span></span><br><span class="line"><span class="keyword">CREATE TABLE</span> orders (</span><br><span class="line">    id          <span class="type">BIGINT</span> UNSIGNED <span class="keyword">NOT NULL</span> AUTO_INCREMENT COMMENT <span class="string">&#x27;主键&#x27;</span>,</span><br><span class="line">    order_no    <span class="type">CHAR</span>(<span class="number">20</span>)        <span class="keyword">NOT NULL</span> COMMENT <span class="string">&#x27;订单号&#x27;</span>,</span><br><span class="line">    user_id     <span class="type">BIGINT</span> UNSIGNED <span class="keyword">NOT NULL</span> COMMENT <span class="string">&#x27;用户ID&#x27;</span>,</span><br><span class="line">    amount      <span class="type">DECIMAL</span>(<span class="number">12</span>,<span class="number">2</span>)   <span class="keyword">NOT NULL</span> <span class="keyword">DEFAULT</span> <span class="number">0.00</span> COMMENT <span class="string">&#x27;金额&#x27;</span>,</span><br><span class="line">    status      TINYINT UNSIGNED <span class="keyword">NOT NULL</span> <span class="keyword">DEFAULT</span> <span class="number">0</span> COMMENT <span class="string">&#x27;0待支付 1已支付 2已发货 3已完成 4已取消&#x27;</span>,</span><br><span class="line">    source      TINYINT UNSIGNED <span class="keyword">NOT NULL</span> <span class="keyword">DEFAULT</span> <span class="number">0</span> COMMENT <span class="string">&#x27;0PC 1H5 2小程序 3APP&#x27;</span>,</span><br><span class="line">    created_at  DATETIME        <span class="keyword">NOT NULL</span> <span class="keyword">DEFAULT</span> <span class="built_in">CURRENT_TIMESTAMP</span> COMMENT <span class="string">&#x27;创建时间&#x27;</span>,</span><br><span class="line">    updated_at  DATETIME        <span class="keyword">NOT NULL</span> <span class="keyword">DEFAULT</span> <span class="built_in">CURRENT_TIMESTAMP</span> <span class="keyword">ON</span> <span class="keyword">UPDATE</span> <span class="built_in">CURRENT_TIMESTAMP</span> COMMENT <span class="string">&#x27;更新时间&#x27;</span>,</span><br><span class="line">    <span class="keyword">PRIMARY KEY</span> (id),</span><br><span class="line">    <span class="keyword">UNIQUE</span> KEY uk_order_no (order_no),</span><br><span class="line">    KEY idx_user_status_time (user_id, status, created_at),</span><br><span class="line">    KEY idx_created_at (created_at)</span><br><span class="line">) ENGINE<span class="operator">=</span>InnoDB <span class="keyword">DEFAULT</span> CHARSET<span class="operator">=</span>utf8mb4 <span class="keyword">COLLATE</span><span class="operator">=</span>utf8mb4_unicode_ci COMMENT<span class="operator">=</span><span class="string">&#x27;订单表&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p><strong>规范要点</strong>：</p>
+<ul>
+<li>所有字段 NOT NULL + DEFAULT（避免 NULL 带来的索引问题）</li>
+<li>主键用无符号自增 BIGINT（性能好，不担心溢出）</li>
+<li>金额用 DECIMAL（精确计算）</li>
+<li>状态用 TINYINT + 注释说明枚举值</li>
+<li>时间字段有默认值，updated_at 自动更新</li>
+<li>utf8mb4 字符集（支持 emoji）</li>
+<li>必须有 COMMENT</li>
+</ul>
+<h3 id="4-3-字段长度最小化原则"><a href="#4-3-字段长度最小化原则" class="headerlink" title="4.3 字段长度最小化原则"></a>4.3 字段长度最小化原则</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ❌ 浪费空间</span></span><br><span class="line">name <span class="type">VARCHAR</span>(<span class="number">500</span>),     <span class="comment">-- 实际最长 50</span></span><br><span class="line">description TEXT,      <span class="comment">-- 实际 200 字以内</span></span><br><span class="line">age <span class="type">INT</span>,               <span class="comment">-- 0-150 用 TINYINT 即可</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 精准控制</span></span><br><span class="line">name <span class="type">VARCHAR</span>(<span class="number">60</span>),           <span class="comment">-- 留 20% buffer</span></span><br><span class="line">description <span class="type">VARCHAR</span>(<span class="number">500</span>),   <span class="comment">-- 够用即可</span></span><br><span class="line">age TINYINT UNSIGNED,       <span class="comment">-- 0-255</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>原因</strong>：InnoDB 一页 16KB，字段越小 → 一页能放越多行 → B+Tree 层级越低 → 查询越快。同时内存中 Buffer Pool 能缓存更多数据。</p>
+<h3 id="4-4-主键设计"><a href="#4-4-主键设计" class="headerlink" title="4.4 主键设计"></a>4.4 主键设计</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ✅ 推荐：自增 BIGINT</span></span><br><span class="line">id <span class="type">BIGINT</span> UNSIGNED <span class="keyword">NOT NULL</span> AUTO_INCREMENT</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 分布式场景：Snowflake 算法生成有序 ID</span></span><br><span class="line">id <span class="type">BIGINT</span> UNSIGNED <span class="keyword">NOT NULL</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- ⚠️ 谨慎：UUID 字符串</span></span><br><span class="line"><span class="comment">-- 问题：无序 → 页分裂严重 → 大量磁盘碎片</span></span><br><span class="line"><span class="comment">-- 替代方案：</span></span><br><span class="line">id <span class="type">BINARY</span>(<span class="number">16</span>) <span class="keyword">NOT NULL</span>  <span class="comment">-- UUID_TO_BIN(UUID(), true) 重新排序避免页分裂</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- ❌ 避免：业务字段做主键（如手机号、身份证）</span></span><br><span class="line"><span class="comment">-- 问题：数据变更需级联更新、占用过多空间、可能不是全局唯一</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="4-5-垂直拆分与大字段处理"><a href="#4-5-垂直拆分与大字段处理" class="headerlink" title="4.5 垂直拆分与大字段处理"></a>4.5 垂直拆分与大字段处理</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 原则：高频访问小字段放主表，低频访问大字段放扩展表</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 主表（频繁访问）</span></span><br><span class="line"><span class="keyword">CREATE TABLE</span> articles (</span><br><span class="line">    id        <span class="type">BIGINT</span> UNSIGNED <span class="keyword">NOT NULL</span> AUTO_INCREMENT,</span><br><span class="line">    title     <span class="type">VARCHAR</span>(<span class="number">200</span>) <span class="keyword">NOT NULL</span>,</span><br><span class="line">    author_id <span class="type">BIGINT</span> UNSIGNED <span class="keyword">NOT NULL</span>,</span><br><span class="line">    summary   <span class="type">VARCHAR</span>(<span class="number">500</span>),</span><br><span class="line">    status    TINYINT <span class="keyword">NOT NULL</span>,</span><br><span class="line">    created_at DATETIME <span class="keyword">NOT NULL</span>,</span><br><span class="line">    <span class="keyword">PRIMARY KEY</span> (id),</span><br><span class="line">    KEY idx_author (author_id)</span><br><span class="line">) ENGINE<span class="operator">=</span>InnoDB;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 扩展表（仅查看详情时 JOIN）</span></span><br><span class="line"><span class="keyword">CREATE TABLE</span> article_contents (</span><br><span class="line">    article_id <span class="type">BIGINT</span> UNSIGNED <span class="keyword">NOT NULL</span> <span class="keyword">PRIMARY KEY</span>,</span><br><span class="line">    content    MEDIUMTEXT <span class="keyword">NOT NULL</span>,   <span class="comment">-- 大字段</span></span><br><span class="line">    images     JSON,                   <span class="comment">-- MySQL 5.7+</span></span><br><span class="line">    attachments TEXT</span><br><span class="line">) ENGINE<span class="operator">=</span>InnoDB;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-6-适当冗余减少-JOIN"><a href="#4-6-适当冗余减少-JOIN" class="headerlink" title="4.6 适当冗余减少 JOIN"></a>4.6 适当冗余减少 JOIN</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 高频查询：订单列表页需要显示用户昵称</span></span><br><span class="line"><span class="comment">-- 策略：orders 表中冗余 username 字段</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- ❌ 每次查询 JOIN</span></span><br><span class="line"><span class="keyword">SELECT</span> o.<span class="operator">*</span>, u.username </span><br><span class="line"><span class="keyword">FROM</span> orders o </span><br><span class="line"><span class="keyword">JOIN</span> users u <span class="keyword">ON</span> o.user_id <span class="operator">=</span> u.id</span><br><span class="line"><span class="keyword">WHERE</span> o.created_at <span class="operator">&gt;</span> <span class="string">&#x27;2024-01-01&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 冗余存储</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> orders <span class="keyword">WHERE</span> created_at <span class="operator">&gt;</span> <span class="string">&#x27;2024-01-01&#x27;</span>;</span><br><span class="line"><span class="comment">-- username 写入 orders 表时同步赋值即可</span></span><br><span class="line"><span class="comment">-- 注意：需要定时对账，处理用户改名场景</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="五、执行计划分析（EXPLAIN）"><a href="#五、执行计划分析（EXPLAIN）" class="headerlink" title="五、执行计划分析（EXPLAIN）"></a>五、执行计划分析（EXPLAIN）</h2><h3 id="5-1-EXPLAIN-输出解读"><a href="#5-1-EXPLAIN-输出解读" class="headerlink" title="5.1 EXPLAIN 输出解读"></a>5.1 EXPLAIN 输出解读</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">EXPLAIN <span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> orders <span class="keyword">WHERE</span> user_id <span class="operator">=</span> <span class="number">100</span> <span class="keyword">AND</span> status <span class="operator">=</span> <span class="number">1</span> <span class="keyword">ORDER</span> <span class="keyword">BY</span> created_at <span class="keyword">DESC</span> LIMIT <span class="number">10</span>;</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>列名</th>
+<th>含义</th>
+<th>关注点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>id</strong></td>
+<td>查询标识</td>
+<td>越大越先执行，相同则从上到下</td>
+</tr>
+<tr>
+<td><strong>select_type</strong></td>
+<td>查询类型</td>
+<td>SIMPLE &gt; PRIMARY &gt; SUBQUERY &gt; DERIVED &gt; UNION</td>
+</tr>
+<tr>
+<td><strong>table</strong></td>
+<td>访问的表</td>
+<td>关注 <code>&lt;derivedN&gt;</code> 派生表</td>
+</tr>
+<tr>
+<td><strong>type</strong></td>
+<td>访问方式（关键）</td>
+<td>见下方 type 优先级</td>
+</tr>
+<tr>
+<td><strong>possible_keys</strong></td>
+<td>可用的索引</td>
+<td>有但未用 → 检查原因</td>
+</tr>
+<tr>
+<td><strong>key</strong></td>
+<td>实际使用的索引</td>
+<td>NULL → 未用索引</td>
+</tr>
+<tr>
+<td><strong>key_len</strong></td>
+<td>使用的索引长度</td>
+<td>越长 → 用的列越多</td>
+</tr>
+<tr>
+<td><strong>ref</strong></td>
+<td>索引比较的列或常量</td>
+<td>const &#x2F; 字段名</td>
+</tr>
+<tr>
+<td><strong>rows</strong></td>
+<td>预估扫描行数</td>
+<td>越小越好</td>
+</tr>
+<tr>
+<td><strong>filtered</strong></td>
+<td>条件过滤后占比</td>
+<td>100 最好</td>
+</tr>
+<tr>
+<td><strong>Extra</strong></td>
+<td>额外信息（关键）</td>
+<td>Using index &#x2F; filesort &#x2F; temporary</td>
+</tr>
+</tbody></table>
+<h3 id="5-2-type-访问类型优先级（从优到差）"><a href="#5-2-type-访问类型优先级（从优到差）" class="headerlink" title="5.2 type 访问类型优先级（从优到差）"></a>5.2 type 访问类型优先级（从优到差）</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">system &gt; const &gt; eq_ref &gt; ref &gt; fulltext &gt; ref_or_null &gt; index_merge </span><br><span class="line">&gt; unique_subquery &gt; index_subquery &gt; range &gt; index &gt; ALL</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>type</th>
+<th>说明</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>system</td>
+<td>表只有一行（系统表）</td>
+<td>极少见</td>
+</tr>
+<tr>
+<td><strong>const</strong></td>
+<td>主键或唯一索引等值查询，最多一行</td>
+<td><code>WHERE id = 1</code></td>
+</tr>
+<tr>
+<td><strong>eq_ref</strong></td>
+<td>关联查询，驱动表每行在被驱动表中恰好匹配一行</td>
+<td><code>JOIN ON a.id = b.id</code></td>
+</tr>
+<tr>
+<td><strong>ref</strong></td>
+<td>使用非唯一索引等值查询</td>
+<td><code>WHERE user_id = 100</code></td>
+</tr>
+<tr>
+<td><strong>range</strong></td>
+<td>索引范围扫描</td>
+<td><code>BETWEEN</code> &#x2F; <code>&gt;</code> &#x2F; <code>&lt;</code> &#x2F; <code>IN</code></td>
+</tr>
+<tr>
+<td><strong>index</strong></td>
+<td>全索引扫描（扫整个索引树）</td>
+<td><code>ORDER BY col</code> 无 WHERE</td>
+</tr>
+<tr>
+<td><strong>ALL</strong></td>
+<td>全表扫描（最差）</td>
+<td>无索引 &#x2F; 索引失效</td>
+</tr>
+</tbody></table>
+<p><strong>目标：至少达到 range 级别，理想是 ref 或 const。</strong></p>
+<h3 id="5-3-Extra-关键信息"><a href="#5-3-Extra-关键信息" class="headerlink" title="5.3 Extra 关键信息"></a>5.3 Extra 关键信息</h3><table>
+<thead>
+<tr>
+<th>Extra 值</th>
+<th>含义</th>
+<th>处理</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Using index</strong></td>
+<td>覆盖索引，不需要回表 ✅</td>
+<td>最优</td>
+</tr>
+<tr>
+<td><strong>Using where</strong></td>
+<td>使用 WHERE 过滤</td>
+<td>正常</td>
+</tr>
+<tr>
+<td><strong>Using index condition</strong></td>
+<td>ICP 下推过滤</td>
+<td>正常</td>
+</tr>
+<tr>
+<td><strong>Using temporary</strong></td>
+<td>使用临时表 ⚠️</td>
+<td>需优化（加索引 &#x2F; 改写 SQL）</td>
+</tr>
+<tr>
+<td><strong>Using filesort</strong></td>
+<td>文件排序 ⚠️</td>
+<td>需优化（加适合排序的索引）</td>
+</tr>
+<tr>
+<td><strong>Using join buffer</strong></td>
+<td>Join 时用了内存缓冲 ⚠️</td>
+<td>被驱动表加索引</td>
+</tr>
+<tr>
+<td><strong>Impossible WHERE</strong></td>
+<td>WHERE 条件恒假</td>
+<td>检查 SQL 逻辑</td>
+</tr>
+<tr>
+<td><strong>Select tables optimized away</strong></td>
+<td>最优：无需读表</td>
+<td>聚合函数可直接从索引获取</td>
+</tr>
+</tbody></table>
+<h3 id="5-4-EXPLAIN-ANALYZE（MySQL-8-0-18-）"><a href="#5-4-EXPLAIN-ANALYZE（MySQL-8-0-18-）" class="headerlink" title="5.4 EXPLAIN ANALYZE（MySQL 8.0.18+）"></a>5.4 EXPLAIN ANALYZE（MySQL 8.0.18+）</h3><p>比 EXPLAIN 更强，显示实际执行时间和行数：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">EXPLAIN ANALYZE </span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> orders <span class="keyword">WHERE</span> user_id <span class="operator">=</span> <span class="number">100</span> <span class="keyword">AND</span> status <span class="operator">=</span> <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 输出示例：</span></span><br><span class="line"><span class="comment">-- -&gt; Filter: (orders.status = 1)  </span></span><br><span class="line"><span class="comment">--     (cost=12.35 rows=10) </span></span><br><span class="line"><span class="comment">--     (actual time=0.050..0.120 rows=8 loops=1)</span></span><br><span class="line"><span class="comment">--     -&gt; Index lookup on orders using idx_user_status (user_id=100)  </span></span><br><span class="line"><span class="comment">--         (cost=2.15 rows=15) </span></span><br><span class="line"><span class="comment">--         (actual time=0.030..0.100 rows=12 loops=1)</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="六、MySQL-参数调优"><a href="#六、MySQL-参数调优" class="headerlink" title="六、MySQL 参数调优"></a>六、MySQL 参数调优</h2><h3 id="6-1-核心参数配置"><a href="#6-1-核心参数配置" class="headerlink" title="6.1 核心参数配置"></a>6.1 核心参数配置</h3><figure class="highlight ini"><table><tr><td class="code"><pre><span class="line"><span class="section">[mysqld]</span></span><br><span class="line"><span class="comment"># ==================== 连接相关 ====================</span></span><br><span class="line"><span class="attr">max_connections</span>        = <span class="number">500</span>              <span class="comment"># 最大连接数（根据业务调整）</span></span><br><span class="line"><span class="attr">wait_timeout</span>           = <span class="number">300</span>              <span class="comment"># 非交互连接超时（秒）</span></span><br><span class="line"><span class="attr">interactive_timeout</span>    = <span class="number">600</span>              <span class="comment"># 交互式连接超时</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ==================== InnoDB Buffer Pool ====================</span></span><br><span class="line"><span class="attr">innodb_buffer_pool_size</span> = <span class="number">8</span>G             <span class="comment"># 物理内存 50-70%（最重要参数）</span></span><br><span class="line"><span class="attr">innodb_buffer_pool_instances</span> = <span class="number">8</span>         <span class="comment"># Buffer Pool 实例数（≥ 1GB 时建议 4-8）</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ==================== 日志相关 ====================</span></span><br><span class="line"><span class="attr">innodb_log_file_size</span>   = <span class="number">2</span>G              <span class="comment"># 重做日志文件大小</span></span><br><span class="line"><span class="attr">innodb_log_buffer_size</span> = <span class="number">64</span>M             <span class="comment"># 日志缓冲区</span></span><br><span class="line"><span class="attr">innodb_flush_log_at_trx_commit</span> = <span class="number">1</span>       <span class="comment"># 1=最安全 2=高性能（可能丢1s数据）</span></span><br><span class="line"><span class="attr">sync_binlog</span>            = <span class="number">1</span>               <span class="comment"># 1=最安全 0/N=高性能</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ==================== I/O 相关 ====================</span></span><br><span class="line"><span class="attr">innodb_io_capacity</span>     = <span class="number">2000</span>            <span class="comment"># SSD 建议 2000+，HDD 建议 200</span></span><br><span class="line"><span class="attr">innodb_io_capacity_max</span> = <span class="number">4000</span>            <span class="comment"># 最大值</span></span><br><span class="line"><span class="attr">innodb_flush_method</span>    = O_DIRECT        <span class="comment"># 绕过 OS 缓存（Linux）</span></span><br><span class="line"><span class="attr">innodb_read_io_threads</span>  = <span class="number">8</span>             <span class="comment"># 读 I/O 线程</span></span><br><span class="line"><span class="attr">innodb_write_io_threads</span> = <span class="number">8</span>             <span class="comment"># 写 I/O 线程</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ==================== 并发相关 ====================</span></span><br><span class="line"><span class="attr">innodb_thread_concurrency</span> = <span class="number">0</span>           <span class="comment"># 0=不限制（推荐），或 CPU 核数 * 2</span></span><br><span class="line"><span class="attr">innodb_lock_wait_timeout</span> = <span class="number">10</span>           <span class="comment"># 锁等待超时（秒）</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ==================== 临时表 ====================</span></span><br><span class="line"><span class="attr">tmp_table_size</span>         = <span class="number">128</span>M            <span class="comment"># 内存临时表最大值</span></span><br><span class="line"><span class="attr">max_heap_table_size</span>    = <span class="number">128</span>M            <span class="comment"># MEMORY 引擎表最大值</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ==================== 排序/Join 缓冲 ====================</span></span><br><span class="line"><span class="attr">sort_buffer_size</span>       = <span class="number">8</span>M              <span class="comment"># 排序缓冲区（每个会话）</span></span><br><span class="line"><span class="attr">join_buffer_size</span>       = <span class="number">8</span>M              <span class="comment"># Join 缓冲区（每个会话）</span></span><br><span class="line"><span class="attr">read_buffer_size</span>       = <span class="number">4</span>M              <span class="comment"># 顺序读缓冲区</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ==================== 慢查询 ====================</span></span><br><span class="line"><span class="attr">slow_query_log</span>         = <span class="number">1</span>               <span class="comment"># 开启慢查询日志</span></span><br><span class="line"><span class="attr">long_query_time</span>        = <span class="number">1</span>               <span class="comment"># 超过 1 秒记录</span></span><br><span class="line"><span class="attr">log_queries_not_using_indexes</span> = <span class="number">0</span>       <span class="comment"># 是否记录未用索引的查询</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="6-2-Buffer-Pool-命中率监控"><a href="#6-2-Buffer-Pool-命中率监控" class="headerlink" title="6.2 Buffer Pool 命中率监控"></a>6.2 Buffer Pool 命中率监控</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- Buffer Pool 命中率（应 ≥ 99%）</span></span><br><span class="line"><span class="keyword">SELECT</span> </span><br><span class="line">    (<span class="number">1</span> <span class="operator">-</span> (<span class="keyword">SELECT</span> VARIABLE_VALUE <span class="keyword">FROM</span> performance_schema.global_status <span class="keyword">WHERE</span> VARIABLE_NAME <span class="operator">=</span> <span class="string">&#x27;Innodb_buffer_pool_reads&#x27;</span>)</span><br><span class="line">        <span class="operator">/</span> (<span class="keyword">SELECT</span> VARIABLE_VALUE <span class="keyword">FROM</span> performance_schema.global_status <span class="keyword">WHERE</span> VARIABLE_NAME <span class="operator">=</span> <span class="string">&#x27;Innodb_buffer_pool_read_requests&#x27;</span>)</span><br><span class="line">    ) <span class="operator">*</span> <span class="number">100</span> <span class="keyword">AS</span> buffer_pool_hit_rate;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- Buffer Pool 使用率</span></span><br><span class="line"><span class="keyword">SELECT</span> </span><br><span class="line">    (<span class="keyword">SELECT</span> VARIABLE_VALUE <span class="keyword">FROM</span> performance_schema.global_status <span class="keyword">WHERE</span> VARIABLE_NAME <span class="operator">=</span> <span class="string">&#x27;Innodb_buffer_pool_pages_data&#x27;</span>)</span><br><span class="line">    <span class="operator">/</span> (<span class="keyword">SELECT</span> VARIABLE_VALUE <span class="keyword">FROM</span> performance_schema.global_status <span class="keyword">WHERE</span> VARIABLE_NAME <span class="operator">=</span> <span class="string">&#x27;Innodb_buffer_pool_pages_total&#x27;</span>)</span><br><span class="line">    <span class="operator">*</span> <span class="number">100</span> <span class="keyword">AS</span> buffer_pool_usage;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="七、连接查询优化"><a href="#七、连接查询优化" class="headerlink" title="七、连接查询优化"></a>七、连接查询优化</h2><h3 id="7-1-JOIN-算法"><a href="#7-1-JOIN-算法" class="headerlink" title="7.1 JOIN 算法"></a>7.1 JOIN 算法</h3><table>
+<thead>
+<tr>
+<th>算法</th>
+<th>说明</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Nested-Loop Join (NLJ)</td>
+<td>驱动表每行去被驱动表扫描</td>
+<td>被驱动表有索引 → 效率高</td>
+</tr>
+<tr>
+<td>Block Nested-Loop Join (BNL)</td>
+<td>驱动表批量放入 Join Buffer</td>
+<td>被驱动表无索引（8.0.20 后废弃）</td>
+</tr>
+<tr>
+<td>Hash Join</td>
+<td>构建哈希表</td>
+<td>MySQL 8.0.18+，替代 BNL</td>
+</tr>
+</tbody></table>
+<h3 id="7-2-JOIN-优化原则"><a href="#7-2-JOIN-优化原则" class="headerlink" title="7.2 JOIN 优化原则"></a>7.2 JOIN 优化原则</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 原则 1：小表驱动大表</span></span><br><span class="line"><span class="comment">-- 优化器一般自动选择，但复杂查询可能失效</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- ❌ 大表驱动小表</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> big_table b <span class="keyword">JOIN</span> small_table s <span class="keyword">ON</span> b.id <span class="operator">=</span> s.big_id;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 小表驱动大表（或使用 STRAIGHT_JOIN 强制）</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> small_table s</span><br><span class="line">STRAIGHT_JOIN big_table b <span class="keyword">ON</span> s.big_id <span class="operator">=</span> b.id;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 原则 2：被驱动表的 JOIN 列必须有索引</span></span><br><span class="line"><span class="comment">-- idx_orders_user_id ON orders(user_id)</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users u</span><br><span class="line"><span class="keyword">JOIN</span> orders o <span class="keyword">ON</span> u.id <span class="operator">=</span> o.user_id  <span class="comment">-- o.user_id 必须有索引</span></span><br><span class="line"><span class="keyword">WHERE</span> u.status <span class="operator">=</span> <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 原则 3：避免笛卡尔积</span></span><br><span class="line"><span class="comment">-- ❌ 少了 ON 条件或条件错误</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> a <span class="keyword">JOIN</span> b;  <span class="comment">-- 笛卡尔积！</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 原则 4：JOIN 字段类型一致（避免隐式转换）</span></span><br><span class="line"><span class="comment">-- ❌ users.id 是 BIGINT，orders.user_id 是 VARCHAR</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users u <span class="keyword">JOIN</span> orders o <span class="keyword">ON</span> u.id <span class="operator">=</span> o.user_id;</span><br><span class="line"><span class="comment">-- ✅ 统一类型</span></span><br><span class="line"><span class="keyword">ALTER TABLE</span> orders MODIFY user_id <span class="type">BIGINT</span> UNSIGNED <span class="keyword">NOT NULL</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-3-多表-JOIN-优化"><a href="#7-3-多表-JOIN-优化" class="headerlink" title="7.3 多表 JOIN 优化"></a>7.3 多表 JOIN 优化</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 最多 JOIN 3-5 张表，超出建议拆分</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- ❌ 过多 JOIN</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> a </span><br><span class="line"><span class="keyword">JOIN</span> b <span class="keyword">ON</span> ... <span class="keyword">JOIN</span> c <span class="keyword">ON</span> ... <span class="keyword">JOIN</span> d <span class="keyword">ON</span> ... <span class="keyword">JOIN</span> e <span class="keyword">ON</span> ... <span class="keyword">JOIN</span> f <span class="keyword">ON</span> ...;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 拆分：先把核心数据查出，再查关联表</span></span><br><span class="line"><span class="comment">-- Step 1: 查主表</span></span><br><span class="line"><span class="keyword">SELECT</span> id, name <span class="keyword">FROM</span> a <span class="keyword">WHERE</span> ... LIMIT <span class="number">100</span>;</span><br><span class="line"><span class="comment">-- Step 2: 应用程序拿到 id 列表，再 IN 查询 b, c</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> b <span class="keyword">WHERE</span> a_id <span class="keyword">IN</span> (<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,...);</span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> c <span class="keyword">WHERE</span> b_id <span class="keyword">IN</span> (<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,...);</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-4-LEFT-JOIN-注意事项"><a href="#7-4-LEFT-JOIN-注意事项" class="headerlink" title="7.4 LEFT JOIN 注意事项"></a>7.4 LEFT JOIN 注意事项</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- LEFT JOIN 时，右表的过滤条件放在 ON 中 vs WHERE 中效果不同</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 写法 1：条件放在 WHERE（可能把 LEFT JOIN 变成 INNER JOIN）</span></span><br><span class="line"><span class="keyword">SELECT</span> u.<span class="operator">*</span>, o.<span class="operator">*</span></span><br><span class="line"><span class="keyword">FROM</span> users u</span><br><span class="line"><span class="keyword">LEFT</span> <span class="keyword">JOIN</span> orders o <span class="keyword">ON</span> u.id <span class="operator">=</span> o.user_id</span><br><span class="line"><span class="keyword">WHERE</span> o.status <span class="operator">=</span> <span class="number">1</span>;  <span class="comment">-- ❌ 会过滤掉没有订单的用户</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 写法 2：条件放在 ON（保留左表所有行）</span></span><br><span class="line"><span class="keyword">SELECT</span> u.<span class="operator">*</span>, o.<span class="operator">*</span></span><br><span class="line"><span class="keyword">FROM</span> users u</span><br><span class="line"><span class="keyword">LEFT</span> <span class="keyword">JOIN</span> orders o <span class="keyword">ON</span> u.id <span class="operator">=</span> o.user_id <span class="keyword">AND</span> o.status <span class="operator">=</span> <span class="number">1</span>;  <span class="comment">-- ✅ 正确</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="八、子查询优化"><a href="#八、子查询优化" class="headerlink" title="八、子查询优化"></a>八、子查询优化</h2><h3 id="8-1-子查询改写为-JOIN"><a href="#8-1-子查询改写为-JOIN" class="headerlink" title="8.1 子查询改写为 JOIN"></a>8.1 子查询改写为 JOIN</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ❌ 子查询（可能产生派生表）</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> orders</span><br><span class="line"><span class="keyword">WHERE</span> user_id <span class="keyword">IN</span> (</span><br><span class="line">    <span class="keyword">SELECT</span> id <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> status <span class="operator">=</span> <span class="number">1</span></span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 改写为 JOIN</span></span><br><span class="line"><span class="keyword">SELECT</span> o.<span class="operator">*</span> <span class="keyword">FROM</span> orders o</span><br><span class="line"><span class="keyword">JOIN</span> users u <span class="keyword">ON</span> o.user_id <span class="operator">=</span> u.id</span><br><span class="line"><span class="keyword">WHERE</span> u.status <span class="operator">=</span> <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 或用 EXISTS</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> orders o</span><br><span class="line"><span class="keyword">WHERE</span> <span class="keyword">EXISTS</span> (</span><br><span class="line">    <span class="keyword">SELECT</span> <span class="number">1</span> <span class="keyword">FROM</span> users u <span class="keyword">WHERE</span> u.id <span class="operator">=</span> o.user_id <span class="keyword">AND</span> u.status <span class="operator">=</span> <span class="number">1</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<h3 id="8-2-避免在-SELECT-中使用子查询"><a href="#8-2-避免在-SELECT-中使用子查询" class="headerlink" title="8.2 避免在 SELECT 中使用子查询"></a>8.2 避免在 SELECT 中使用子查询</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ❌ 每行执行一次子查询</span></span><br><span class="line"><span class="keyword">SELECT</span> </span><br><span class="line">    u.id, u.name,</span><br><span class="line">    (<span class="keyword">SELECT</span> <span class="built_in">COUNT</span>(<span class="operator">*</span>) <span class="keyword">FROM</span> orders o <span class="keyword">WHERE</span> o.user_id <span class="operator">=</span> u.id) <span class="keyword">AS</span> order_count</span><br><span class="line"><span class="keyword">FROM</span> users u;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 改用 JOIN + GROUP BY</span></span><br><span class="line"><span class="keyword">SELECT</span> u.id, u.name, <span class="built_in">COUNT</span>(o.id) <span class="keyword">AS</span> order_count</span><br><span class="line"><span class="keyword">FROM</span> users u</span><br><span class="line"><span class="keyword">LEFT</span> <span class="keyword">JOIN</span> orders o <span class="keyword">ON</span> u.id <span class="operator">=</span> o.user_id</span><br><span class="line"><span class="keyword">GROUP</span> <span class="keyword">BY</span> u.id, u.name;</span><br></pre></td></tr></table></figure>
+
+<h3 id="8-3-NOT-IN-vs-NOT-EXISTS-的-NULL-陷阱"><a href="#8-3-NOT-IN-vs-NOT-EXISTS-的-NULL-陷阱" class="headerlink" title="8.3 NOT IN vs NOT EXISTS 的 NULL 陷阱"></a>8.3 NOT IN vs NOT EXISTS 的 NULL 陷阱</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ⚠️ NOT IN + 子查询返回 NULL → 整个条件为 UNKNOWN，返回空！</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> orders </span><br><span class="line"><span class="keyword">WHERE</span> user_id <span class="keyword">NOT</span> <span class="keyword">IN</span> (</span><br><span class="line">    <span class="keyword">SELECT</span> id <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> deleted_at <span class="keyword">IS</span> <span class="keyword">NOT NULL</span>  </span><br><span class="line">    <span class="comment">-- 如果 id 中有 NULL，NOT IN 永远返回空！</span></span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 改用 NOT EXISTS（不受 NULL 影响）</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> orders o</span><br><span class="line"><span class="keyword">WHERE</span> <span class="keyword">NOT</span> <span class="keyword">EXISTS</span> (</span><br><span class="line">    <span class="keyword">SELECT</span> <span class="number">1</span> <span class="keyword">FROM</span> users u <span class="keyword">WHERE</span> u.id <span class="operator">=</span> o.user_id <span class="keyword">AND</span> u.deleted_at <span class="keyword">IS</span> <span class="keyword">NOT NULL</span></span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 或者子查询中显式排除 NULL</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> orders </span><br><span class="line"><span class="keyword">WHERE</span> user_id <span class="keyword">NOT</span> <span class="keyword">IN</span> (</span><br><span class="line">    <span class="keyword">SELECT</span> id <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> deleted_at <span class="keyword">IS</span> <span class="keyword">NOT NULL</span> <span class="keyword">AND</span> id <span class="keyword">IS</span> <span class="keyword">NOT NULL</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="九、排序与分组优化"><a href="#九、排序与分组优化" class="headerlink" title="九、排序与分组优化"></a>九、排序与分组优化</h2><h3 id="9-1-ORDER-BY-优化"><a href="#9-1-ORDER-BY-优化" class="headerlink" title="9.1 ORDER BY 优化"></a>9.1 ORDER BY 优化</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 核心原则：利用索引有序性避免 filesort</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 场景 1：完全利用索引排序</span></span><br><span class="line">INDEX idx_user_time (user_id, created_at)</span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users </span><br><span class="line"><span class="keyword">WHERE</span> user_id <span class="operator">=</span> <span class="number">1</span> </span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> created_at <span class="keyword">DESC</span>;  <span class="comment">-- ✅ 使用索引，Extra: 无 filesort</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 场景 2：WHERE 等值 + ORDER BY 不同方向</span></span><br><span class="line">INDEX idx_a_b (a, b)</span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> t <span class="keyword">WHERE</span> a <span class="operator">=</span> <span class="number">1</span> <span class="keyword">ORDER</span> <span class="keyword">BY</span> b <span class="keyword">ASC</span>, c <span class="keyword">DESC</span>;  <span class="comment">-- ❌ 混合 ASC/DESC</span></span><br><span class="line"><span class="comment">-- 索引只能单一方向</span></span><br><span class="line"><span class="comment">-- MySQL 8.0+ 支持降序索引：INDEX idx_a_b_c (a, b ASC, c DESC)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 场景 3：ORDER BY 多个字段但不在同一索引</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">ORDER</span> <span class="keyword">BY</span> status, created_at;</span><br><span class="line"><span class="comment">-- ✅ 建联合索引</span></span><br><span class="line"><span class="keyword">CREATE</span> INDEX idx_status_created <span class="keyword">ON</span> users(status, created_at);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 场景 4：排序结果集很大 → 调大 sort_buffer_size</span></span><br><span class="line"><span class="keyword">SET</span> SESSION sort_buffer_size <span class="operator">=</span> <span class="number">16</span> <span class="operator">*</span> <span class="number">1024</span> <span class="operator">*</span> <span class="number">1024</span>;  <span class="comment">-- 16M</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="9-2-GROUP-BY-优化"><a href="#9-2-GROUP-BY-优化" class="headerlink" title="9.2 GROUP BY 优化"></a>9.2 GROUP BY 优化</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- GROUP BY 也会利用索引</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 利用索引排序避免临时表</span></span><br><span class="line">INDEX idx_dept (department_id)</span><br><span class="line"><span class="keyword">SELECT</span> department_id, <span class="built_in">COUNT</span>(<span class="operator">*</span>) <span class="keyword">FROM</span> employees <span class="keyword">GROUP</span> <span class="keyword">BY</span> department_id;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ❌ GROUP BY + ORDER BY 不同列</span></span><br><span class="line"><span class="keyword">SELECT</span> department_id, <span class="built_in">COUNT</span>(<span class="operator">*</span>) <span class="keyword">AS</span> cnt </span><br><span class="line"><span class="keyword">FROM</span> employees </span><br><span class="line"><span class="keyword">GROUP</span> <span class="keyword">BY</span> department_id </span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> cnt <span class="keyword">DESC</span>;  <span class="comment">-- filesort + temporary</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 技巧：如果必须按聚合结果排序，限制数据量</span></span><br><span class="line"><span class="keyword">SELECT</span> department_id, <span class="built_in">COUNT</span>(<span class="operator">*</span>) <span class="keyword">AS</span> cnt </span><br><span class="line"><span class="keyword">FROM</span> employees </span><br><span class="line"><span class="keyword">WHERE</span> created_at <span class="operator">&gt;</span> <span class="string">&#x27;2024-01-01&#x27;</span>  <span class="comment">-- 先缩小范围</span></span><br><span class="line"><span class="keyword">GROUP</span> <span class="keyword">BY</span> department_id </span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> cnt <span class="keyword">DESC</span> </span><br><span class="line">LIMIT <span class="number">10</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="9-3-DISTINCT-优化"><a href="#9-3-DISTINCT-优化" class="headerlink" title="9.3 DISTINCT 优化"></a>9.3 DISTINCT 优化</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ❌ DISTINCT 去重（可能产生临时表）</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">DISTINCT</span> department_id <span class="keyword">FROM</span> employees;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 如果 department_id 有索引，用 GROUP BY 有时更高效</span></span><br><span class="line"><span class="keyword">SELECT</span> department_id <span class="keyword">FROM</span> employees <span class="keyword">GROUP</span> <span class="keyword">BY</span> department_id;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 或者用覆盖索引</span></span><br><span class="line"><span class="comment">-- 如果有 INDEX idx_dept (department_id)</span></span><br><span class="line"><span class="keyword">SELECT</span> department_id <span class="keyword">FROM</span> employees <span class="keyword">GROUP</span> <span class="keyword">BY</span> department_id;</span><br><span class="line"><span class="comment">-- Extra: Using index for group-by  ← 最优</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="十、分页查询优化"><a href="#十、分页查询优化" class="headerlink" title="十、分页查询优化"></a>十、分页查询优化</h2><h3 id="10-1-深分页问题"><a href="#10-1-深分页问题" class="headerlink" title="10.1 深分页问题"></a>10.1 深分页问题</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ❌ 深分页：扫描前 100010 行，丢弃 100000 行，返回 10 行</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> orders <span class="keyword">ORDER</span> <span class="keyword">BY</span> id LIMIT <span class="number">100000</span>, <span class="number">10</span>;</span><br><span class="line"><span class="comment">-- 扫描行：100010，返回行：10，浪费严重！</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="10-2-延迟关联（Deferred-Join）"><a href="#10-2-延迟关联（Deferred-Join）" class="headerlink" title="10.2 延迟关联（Deferred Join）"></a>10.2 延迟关联（Deferred Join）</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ✅ 方案 1：先取 ID，再 JOIN 取完整数据</span></span><br><span class="line"><span class="keyword">SELECT</span> o.<span class="operator">*</span> <span class="keyword">FROM</span> orders o</span><br><span class="line"><span class="keyword">JOIN</span> (</span><br><span class="line">    <span class="keyword">SELECT</span> id <span class="keyword">FROM</span> orders <span class="keyword">ORDER</span> <span class="keyword">BY</span> id LIMIT <span class="number">100000</span>, <span class="number">10</span></span><br><span class="line">) <span class="keyword">AS</span> tmp <span class="keyword">ON</span> o.id <span class="operator">=</span> tmp.id;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 或分两步：</span></span><br><span class="line"><span class="comment">-- Step 1: SELECT id FROM orders ORDER BY id LIMIT 100000, 10;</span></span><br><span class="line"><span class="comment">-- Step 2: SELECT * FROM orders WHERE id IN (100001, 100002, ...);</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="10-3-游标分页（推荐）"><a href="#10-3-游标分页（推荐）" class="headerlink" title="10.3 游标分页（推荐）"></a>10.3 游标分页（推荐）</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ✅ 方案 2：基于游标（上一页最后一条的 ID）</span></span><br><span class="line"><span class="comment">-- 第 1 页</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> orders <span class="keyword">WHERE</span> id <span class="operator">&gt;</span> <span class="number">0</span> <span class="keyword">ORDER</span> <span class="keyword">BY</span> id LIMIT <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 第 N 页（拿到上一页最后 id = 100000）</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> orders <span class="keyword">WHERE</span> id <span class="operator">&gt;</span> <span class="number">100000</span> <span class="keyword">ORDER</span> <span class="keyword">BY</span> id LIMIT <span class="number">10</span>;</span><br><span class="line"><span class="comment">-- 始终只扫描 10 行！</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>游标分页的代价</strong>：无法跳页，需要业务配合改造。</p>
+<h3 id="10-4-分页总数优化"><a href="#10-4-分页总数优化" class="headerlink" title="10.4 分页总数优化"></a>10.4 分页总数优化</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ❌ 每次分页都 COUNT(*)（全量扫描）</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="built_in">COUNT</span>(<span class="operator">*</span>) <span class="keyword">FROM</span> orders <span class="keyword">WHERE</span> status <span class="operator">=</span> <span class="number">1</span>;  <span class="comment">-- 1000W 行</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 优化方案：</span></span><br><span class="line"><span class="comment">-- 方案 A：缓存总数（对时效性要求不高的场景）</span></span><br><span class="line"><span class="comment">-- 方案 B：使用 EXPLAIN 的 rows 估算值</span></span><br><span class="line"><span class="comment">-- 方案 C：只显示&quot;下一页&quot;，不显示总数（如社交 feeds 流）</span></span><br><span class="line"><span class="comment">-- 方案 D：使用 Redis 维护计数器（配合 binlog 同步）</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="十一、事务与锁优化"><a href="#十一、事务与锁优化" class="headerlink" title="十一、事务与锁优化"></a>十一、事务与锁优化</h2><h3 id="11-1-事务优化原则"><a href="#11-1-事务优化原则" class="headerlink" title="11.1 事务优化原则"></a>11.1 事务优化原则</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 原则 1：事务尽量小，不要长事务</span></span><br><span class="line"><span class="comment">-- ❌ 事务中做非 DB 操作</span></span><br><span class="line"><span class="keyword">START</span> TRANSACTION;</span><br><span class="line"><span class="keyword">UPDATE</span> orders <span class="keyword">SET</span> status <span class="operator">=</span> <span class="number">2</span> <span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="number">100</span>;</span><br><span class="line"><span class="comment">-- 发送邮件、调用第三方 API... → 锁一直持有！</span></span><br><span class="line"><span class="keyword">COMMIT</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 非 DB 操作放到事务外</span></span><br><span class="line"><span class="keyword">UPDATE</span> orders <span class="keyword">SET</span> status <span class="operator">=</span> <span class="number">2</span> <span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="number">100</span>;  <span class="comment">-- 单条语句也是事务</span></span><br><span class="line"><span class="comment">-- 再发送邮件</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 原则 2：避免在事务中等待用户输入</span></span><br><span class="line"><span class="comment">-- 原则 3：批量操作分小事务</span></span><br><span class="line"><span class="comment">-- ❌ 单事务更新 100W 行 → 锁持有太久</span></span><br><span class="line"><span class="keyword">START</span> TRANSACTION;</span><br><span class="line"><span class="keyword">UPDATE</span> logs <span class="keyword">SET</span> processed <span class="operator">=</span> <span class="number">1</span> <span class="keyword">WHERE</span> created_at <span class="operator">&lt;</span> <span class="string">&#x27;2024-01-01&#x27;</span>;</span><br><span class="line"><span class="keyword">COMMIT</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 分批次</span></span><br><span class="line"><span class="comment">-- 每次更新 5000 行</span></span><br><span class="line"><span class="keyword">UPDATE</span> logs <span class="keyword">SET</span> processed <span class="operator">=</span> <span class="number">1</span> <span class="keyword">WHERE</span> created_at <span class="operator">&lt;</span> <span class="string">&#x27;2024-01-01&#x27;</span> LIMIT <span class="number">5000</span>;</span><br><span class="line"><span class="comment">-- 循环直到 affected_rows = 0</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="11-2-锁类型与避免"><a href="#11-2-锁类型与避免" class="headerlink" title="11.2 锁类型与避免"></a>11.2 锁类型与避免</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 查看当前锁等待</span></span><br><span class="line"><span class="keyword">SELECT</span> </span><br><span class="line">    r.trx_id <span class="keyword">AS</span> waiting_trx_id,</span><br><span class="line">    r.trx_mysql_thread_id <span class="keyword">AS</span> waiting_thread,</span><br><span class="line">    b.trx_id <span class="keyword">AS</span> blocking_trx_id,</span><br><span class="line">    b.trx_mysql_thread_id <span class="keyword">AS</span> blocking_thread</span><br><span class="line"><span class="keyword">FROM</span> information_schema.innodb_lock_waits w</span><br><span class="line"><span class="keyword">JOIN</span> information_schema.innodb_trx r <span class="keyword">ON</span> w.requesting_trx_id <span class="operator">=</span> r.trx_id</span><br><span class="line"><span class="keyword">JOIN</span> information_schema.innodb_trx b <span class="keyword">ON</span> w.blocking_trx_id <span class="operator">=</span> b.trx_id;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- MySQL 8.0+ 推荐</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> performance_schema.data_lock_waits\G</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 避免死锁的原则：</span></span><br><span class="line"><span class="comment">-- 1. 按相同顺序访问资源（如统一按 id 升序更新）</span></span><br><span class="line"><span class="comment">-- 2. 尽量用主键/唯一键精确更新（减少锁范围）</span></span><br><span class="line"><span class="comment">-- 3. 减少事务持锁时间</span></span><br><span class="line"><span class="comment">-- 4. 合理使用 READ COMMITTED 隔离级别（减少间隙锁）</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="11-3-隔离级别选择"><a href="#11-3-隔离级别选择" class="headerlink" title="11.3 隔离级别选择"></a>11.3 隔离级别选择</h3><table>
+<thead>
+<tr>
+<th>隔离级别</th>
+<th>脏读</th>
+<th>不可重复读</th>
+<th>幻读</th>
+<th>性能</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>READ UNCOMMITTED</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>最高</td>
+<td>几乎不用</td>
+</tr>
+<tr>
+<td>READ COMMITTED</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>较高</td>
+<td>多数场景（推荐）</td>
+</tr>
+<tr>
+<td>REPEATABLE READ (默认)</td>
+<td>❌</td>
+<td>❌</td>
+<td>⚠️*</td>
+<td>中等</td>
+<td>MySQL 默认</td>
+</tr>
+<tr>
+<td>SERIALIZABLE</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>最低</td>
+<td>强一致性要求</td>
+</tr>
+</tbody></table>
+<p><em>*InnoDB 的 REPEATABLE READ 通过 Next-Key Lock 在大多数情况下避免了幻读。</em></p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 设置隔离级别</span></span><br><span class="line"><span class="keyword">SET</span> SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="十二、大批量数据操作优化"><a href="#十二、大批量数据操作优化" class="headerlink" title="十二、大批量数据操作优化"></a>十二、大批量数据操作优化</h2><h3 id="12-1-批量-INSERT"><a href="#12-1-批量-INSERT" class="headerlink" title="12.1 批量 INSERT"></a>12.1 批量 INSERT</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ❌ 逐条插入（每条一个事务，N 次网络往返）</span></span><br><span class="line"><span class="keyword">INSERT INTO</span> users (name, email) <span class="keyword">VALUES</span> (<span class="string">&#x27;张三&#x27;</span>, <span class="string">&#x27;zhangsan@example.com&#x27;</span>);</span><br><span class="line"><span class="keyword">INSERT INTO</span> users (name, email) <span class="keyword">VALUES</span> (<span class="string">&#x27;李四&#x27;</span>, <span class="string">&#x27;lisi@example.com&#x27;</span>);</span><br><span class="line"><span class="keyword">INSERT INTO</span> users (name, email) <span class="keyword">VALUES</span> (<span class="string">&#x27;王五&#x27;</span>, <span class="string">&#x27;wangwu@example.com&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 批量插入（单条 SQL，1 次往返，单事务）</span></span><br><span class="line"><span class="keyword">INSERT INTO</span> users (name, email) <span class="keyword">VALUES</span> </span><br><span class="line">    (<span class="string">&#x27;张三&#x27;</span>, <span class="string">&#x27;zhangsan@example.com&#x27;</span>),</span><br><span class="line">    (<span class="string">&#x27;李四&#x27;</span>, <span class="string">&#x27;lisi@example.com&#x27;</span>),</span><br><span class="line">    (<span class="string">&#x27;王五&#x27;</span>, <span class="string">&#x27;wangwu@example.com&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 批量插入最佳实践：</span></span><br><span class="line"><span class="comment">-- - 每批 500-5000 行（根据行大小调整）</span></span><br><span class="line"><span class="comment">-- - 关闭自动提交，手动控制事务</span></span><br><span class="line"><span class="comment">-- - 大批量可使用 LOAD DATA INFILE（比 INSERT 快 20 倍）</span></span><br><span class="line"></span><br><span class="line">LOAD DATA <span class="keyword">LOCAL</span> INFILE <span class="string">&#x27;/path/to/data.csv&#x27;</span></span><br><span class="line"><span class="keyword">INTO</span> <span class="keyword">TABLE</span> users</span><br><span class="line">FIELDS TERMINATED <span class="keyword">BY</span> <span class="string">&#x27;,&#x27;</span> </span><br><span class="line">LINES TERMINATED <span class="keyword">BY</span> <span class="string">&#x27;\n&#x27;</span></span><br><span class="line">(name, email);</span><br></pre></td></tr></table></figure>
+
+<h3 id="12-2-批量-UPDATE-DELETE"><a href="#12-2-批量-UPDATE-DELETE" class="headerlink" title="12.2 批量 UPDATE &#x2F; DELETE"></a>12.2 批量 UPDATE &#x2F; DELETE</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ❌ 一次性更新/删除大量数据 → 主从延迟、锁持有太久</span></span><br><span class="line"><span class="keyword">DELETE</span> <span class="keyword">FROM</span> logs <span class="keyword">WHERE</span> created_at <span class="operator">&lt;</span> <span class="string">&#x27;2023-01-01&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 分批删除</span></span><br><span class="line">DELIMITER $$</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">PROCEDURE</span> batch_delete_logs()</span><br><span class="line"><span class="keyword">BEGIN</span></span><br><span class="line">    <span class="keyword">DECLARE</span> affected_rows <span class="type">INT</span> <span class="keyword">DEFAULT</span> <span class="number">1</span>;</span><br><span class="line">    WHILE affected_rows <span class="operator">&gt;</span> <span class="number">0</span> DO</span><br><span class="line">        <span class="keyword">DELETE</span> <span class="keyword">FROM</span> logs </span><br><span class="line">        <span class="keyword">WHERE</span> created_at <span class="operator">&lt;</span> <span class="string">&#x27;2023-01-01&#x27;</span> </span><br><span class="line">        LIMIT <span class="number">5000</span>;</span><br><span class="line">        <span class="keyword">SET</span> affected_rows <span class="operator">=</span> ROW_COUNT();</span><br><span class="line">        DO SLEEP(<span class="number">1</span>);  <span class="comment">-- 间隔 1 秒，避免主从压力过大</span></span><br><span class="line">    <span class="keyword">END</span> WHILE;</span><br><span class="line"><span class="keyword">END</span>$$</span><br><span class="line">DELIMITER ;</span><br></pre></td></tr></table></figure>
+
+<h3 id="12-3-大表加索引（Online-DDL）"><a href="#12-3-大表加索引（Online-DDL）" class="headerlink" title="12.3 大表加索引（Online DDL）"></a>12.3 大表加索引（Online DDL）</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- MySQL 5.6+ InnoDB 支持 Online DDL，不锁表</span></span><br><span class="line"><span class="keyword">ALTER TABLE</span> orders <span class="keyword">ADD</span> INDEX idx_user_time (user_id, created_at), ALGORITHM<span class="operator">=</span>INPLACE, LOCK<span class="operator">=</span><span class="keyword">NONE</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 注意：Online DDL 期间仍有性能开销，避开高峰期操作</span></span><br><span class="line"><span class="comment">-- 大表建议使用 pt-online-schema-change（Percona Toolkit）</span></span><br><span class="line"><span class="comment">-- pt-online-schema-change --alter &quot;ADD INDEX idx_xxx (col)&quot; D=db,t=table</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="12-4-表数据归档"><a href="#12-4-表数据归档" class="headerlink" title="12.4 表数据归档"></a>12.4 表数据归档</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 历史数据移出热表，减少热表体积</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 1. 创建归档表（同结构）</span></span><br><span class="line"><span class="keyword">CREATE TABLE</span> orders_archive <span class="keyword">LIKE</span> orders;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 2. 分批迁移</span></span><br><span class="line"><span class="keyword">INSERT INTO</span> orders_archive </span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> orders <span class="keyword">WHERE</span> created_at <span class="operator">&lt;</span> <span class="string">&#x27;2023-01-01&#x27;</span> LIMIT <span class="number">10000</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 3. 确认数据一致后，分批删除热表数据</span></span><br><span class="line"><span class="keyword">DELETE</span> <span class="keyword">FROM</span> orders <span class="keyword">WHERE</span> created_at <span class="operator">&lt;</span> <span class="string">&#x27;2023-01-01&#x27;</span> LIMIT <span class="number">10000</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 4. 或使用分区表，直接 DROP PARTITION（见第十三章）</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="十三、分库分表策略"><a href="#十三、分库分表策略" class="headerlink" title="十三、分库分表策略"></a>十三、分库分表策略</h2><h3 id="13-1-分表时机"><a href="#13-1-分表时机" class="headerlink" title="13.1 分表时机"></a>13.1 分表时机</h3><table>
+<thead>
+<tr>
+<th>指标</th>
+<th>阈值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>单表行数</td>
+<td>&gt; 500W（根据行大小调整，核心是 B+Tree 层数）</td>
+</tr>
+<tr>
+<td>单表数据大小</td>
+<td>&gt; 10GB</td>
+</tr>
+<tr>
+<td>单表写入 QPS</td>
+<td>&gt; 2000</td>
+</tr>
+<tr>
+<td>单表查询延时</td>
+<td>&gt; 100ms（高频查询）</td>
+</tr>
+<tr>
+<td>维护困难</td>
+<td>ALTER TABLE 耗时 &gt; 30 分钟</td>
+</tr>
+</tbody></table>
+<h3 id="13-2-水平分表方案"><a href="#13-2-水平分表方案" class="headerlink" title="13.2 水平分表方案"></a>13.2 水平分表方案</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 方案 1：按时间分表（适合日志/流水等时间序列数据）</span></span><br><span class="line"><span class="comment">-- orders_202401, orders_202402, ...</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 方案 2：按 ID 取模（适合用户/订单等按 ID 均匀分布）</span></span><br><span class="line"><span class="comment">-- 分 64 张表</span></span><br><span class="line"><span class="comment">-- 路由：table_suffix = user_id % 64</span></span><br><span class="line"><span class="comment">-- users_00, users_01, ..., users_63</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 方案 3：按时间 + 取模（适合热数据集中但总量大的场景）</span></span><br><span class="line"><span class="comment">-- orders_202401_00, orders_202401_01, ...</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 方案 4：一致性哈希（适合动态扩缩容）</span></span><br><span class="line"><span class="comment">-- 虚拟节点映射到物理表</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="13-3-分区表"><a href="#13-3-分区表" class="headerlink" title="13.3 分区表"></a>13.3 分区表</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- MySQL 分区表（透明，业务代码无感知）</span></span><br><span class="line"><span class="comment">-- 按年份范围分区</span></span><br><span class="line"><span class="keyword">CREATE TABLE</span> orders (</span><br><span class="line">    id <span class="type">BIGINT</span> UNSIGNED <span class="keyword">NOT NULL</span> AUTO_INCREMENT,</span><br><span class="line">    user_id <span class="type">BIGINT</span> UNSIGNED <span class="keyword">NOT NULL</span>,</span><br><span class="line">    amount <span class="type">DECIMAL</span>(<span class="number">12</span>,<span class="number">2</span>) <span class="keyword">NOT NULL</span>,</span><br><span class="line">    created_at DATETIME <span class="keyword">NOT NULL</span>,</span><br><span class="line">    <span class="keyword">PRIMARY KEY</span> (id, created_at),  <span class="comment">-- ⚠️ 分区键必须在主键中</span></span><br><span class="line">    KEY idx_user (user_id)</span><br><span class="line">) ENGINE<span class="operator">=</span>InnoDB</span><br><span class="line"><span class="keyword">PARTITION</span> <span class="keyword">BY</span> <span class="keyword">RANGE</span> (<span class="keyword">YEAR</span>(created_at)) (</span><br><span class="line">    <span class="keyword">PARTITION</span> p2022 <span class="keyword">VALUES</span> LESS THAN (<span class="number">2023</span>),</span><br><span class="line">    <span class="keyword">PARTITION</span> p2023 <span class="keyword">VALUES</span> LESS THAN (<span class="number">2024</span>),</span><br><span class="line">    <span class="keyword">PARTITION</span> p2024 <span class="keyword">VALUES</span> LESS THAN (<span class="number">2025</span>),</span><br><span class="line">    <span class="keyword">PARTITION</span> p2025 <span class="keyword">VALUES</span> LESS THAN (<span class="number">2026</span>),</span><br><span class="line">    <span class="keyword">PARTITION</span> p_future <span class="keyword">VALUES</span> LESS THAN MAXVALUE</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 分区修剪：只扫描需要的分区</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> orders <span class="keyword">WHERE</span> created_at <span class="operator">&gt;=</span> <span class="string">&#x27;2024-01-01&#x27;</span>;</span><br><span class="line"><span class="comment">-- 只扫描 p2024 和 p_future 分区</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 归档：直接删除分区（秒级）</span></span><br><span class="line"><span class="keyword">ALTER TABLE</span> orders <span class="keyword">DROP</span> <span class="keyword">PARTITION</span> p2022;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 分区限制：</span></span><br><span class="line"><span class="comment">-- - 分区键必须在所有 UNIQUE KEY 中</span></span><br><span class="line"><span class="comment">-- - 最大 8192 个分区</span></span><br><span class="line"><span class="comment">-- - 不支持 FOREIGN KEY</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="13-4-分库分表中间件"><a href="#13-4-分库分表中间件" class="headerlink" title="13.4 分库分表中间件"></a>13.4 分库分表中间件</h3><table>
+<thead>
+<tr>
+<th>中间件</th>
+<th>特点</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ShardingSphere</td>
+<td>功能全面，社区活跃</td>
+<td>多数场景</td>
+</tr>
+<tr>
+<td>Vitess</td>
+<td>YouTube 开源，成熟</td>
+<td>大规模</td>
+</tr>
+<tr>
+<td>MyCAT</td>
+<td>国内流行</td>
+<td>中小规模</td>
+</tr>
+<tr>
+<td>自研路由</td>
+<td>灵活可控</td>
+<td>定制需求</td>
+</tr>
+<tr>
+<td>应用层路由</td>
+<td>最简单</td>
+<td>简单分表</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="十四、读写分离与主从复制"><a href="#十四、读写分离与主从复制" class="headerlink" title="十四、读写分离与主从复制"></a>十四、读写分离与主从复制</h2><h3 id="14-1-主从架构"><a href="#14-1-主从架构" class="headerlink" title="14.1 主从架构"></a>14.1 主从架构</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">        ┌──────────┐</span><br><span class="line">        │  Master  │ ← 写</span><br><span class="line">        └────┬─────┘</span><br><span class="line">     ┌───────┼───────┐</span><br><span class="line">     ▼       ▼       ▼</span><br><span class="line">┌──────┐ ┌──────┐ ┌──────┐</span><br><span class="line">│Slave1│ │Slave2│ │Slave3│ ← 读</span><br><span class="line">└──────┘ └──────┘ └──────┘</span><br></pre></td></tr></table></figure>
+
+<h3 id="14-2-读写分离注意事项"><a href="#14-2-读写分离注意事项" class="headerlink" title="14.2 读写分离注意事项"></a>14.2 读写分离注意事项</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 问题：主从延迟导致读不到刚写入的数据</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 方案 1：强制走主库（关键业务）</span></span><br><span class="line"><span class="comment">-- 插入/更新后立即查询使用主库</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 方案 2：延迟阈值</span></span><br><span class="line"><span class="comment">-- 如果从库延迟 &gt; 1s，切换到主库</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 方案 3：等待主从同步</span></span><br><span class="line"><span class="comment">-- MySQL 5.7+ 半同步复制 + AFTER_SYNC 模式</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 方案 4：缓存旁路</span></span><br><span class="line"><span class="comment">-- 写入时更新 Redis，读优先查 Redis</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="14-3-主从延迟监控"><a href="#14-3-主从延迟监控" class="headerlink" title="14.3 主从延迟监控"></a>14.3 主从延迟监控</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 在从库执行</span></span><br><span class="line"><span class="keyword">SHOW</span> SLAVE STATUS\G</span><br><span class="line"><span class="comment">-- 关注：Seconds_Behind_Master</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- Performance Schema 方式</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> performance_schema.replication_applier_status_by_worker\G</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="十五、缓存策略"><a href="#十五、缓存策略" class="headerlink" title="十五、缓存策略"></a>十五、缓存策略</h2><h3 id="15-1-缓存分层"><a href="#15-1-缓存分层" class="headerlink" title="15.1 缓存分层"></a>15.1 缓存分层</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌──────────────┐  最快</span><br><span class="line">│  应用层缓存   │  (本地内存 / 进程内)</span><br><span class="line">├──────────────┤</span><br><span class="line">│  分布式缓存   │  (Redis / Memcached)</span><br><span class="line">├──────────────┤</span><br><span class="line">│  数据库缓存   │  (Buffer Pool / Query Cache)</span><br><span class="line">├──────────────┤</span><br><span class="line">│  磁盘存储     │  最慢</span><br><span class="line">└──────────────┘</span><br></pre></td></tr></table></figure>
+
+<h3 id="15-2-Redis-缓存策略"><a href="#15-2-Redis-缓存策略" class="headerlink" title="15.2 Redis 缓存策略"></a>15.2 Redis 缓存策略</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 伪代码示例</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Cache-Aside 模式（最常用）</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_user</span>(<span class="params">user_id</span>):</span><br><span class="line">    <span class="comment"># 1. 先查缓存</span></span><br><span class="line">    user = redis.get(<span class="string">f&quot;user:<span class="subst">&#123;user_id&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="keyword">if</span> user:</span><br><span class="line">        <span class="keyword">return</span> user</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 2. 缓存未命中，查 DB</span></span><br><span class="line">    user = db.query(<span class="string">&quot;SELECT * FROM users WHERE id = ?&quot;</span>, user_id)</span><br><span class="line">    <span class="keyword">if</span> user:</span><br><span class="line">        <span class="comment"># 3. 写入缓存，设置过期时间</span></span><br><span class="line">        redis.setex(<span class="string">f&quot;user:<span class="subst">&#123;user_id&#125;</span>&quot;</span>, <span class="number">3600</span>, user)</span><br><span class="line">    <span class="keyword">return</span> user</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">update_user</span>(<span class="params">user_id, data</span>):</span><br><span class="line">    <span class="comment"># 1. 更新 DB</span></span><br><span class="line">    db.execute(<span class="string">&quot;UPDATE users SET name = ? WHERE id = ?&quot;</span>, data.name, user_id)</span><br><span class="line">    <span class="comment"># 2. 删除缓存（不是更新缓存！）</span></span><br><span class="line">    redis.delete(<span class="string">f&quot;user:<span class="subst">&#123;user_id&#125;</span>&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h3 id="15-3-缓存穿透-击穿-雪崩"><a href="#15-3-缓存穿透-击穿-雪崩" class="headerlink" title="15.3 缓存穿透 &#x2F; 击穿 &#x2F; 雪崩"></a>15.3 缓存穿透 &#x2F; 击穿 &#x2F; 雪崩</h3><table>
+<thead>
+<tr>
+<th>问题</th>
+<th>现象</th>
+<th>解决方案</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>缓存穿透</strong></td>
+<td>查不存在的 key → 每次穿透到 DB</td>
+<td>布隆过滤器 &#x2F; 缓存空值</td>
+</tr>
+<tr>
+<td><strong>缓存击穿</strong></td>
+<td>热点 key 过期 → 瞬间压到 DB</td>
+<td>互斥锁 &#x2F; 永不过期 + 异步更新</td>
+</tr>
+<tr>
+<td><strong>缓存雪崩</strong></td>
+<td>大量 key 同时过期 → DB 崩溃</td>
+<td>过期时间 + 随机值 &#x2F; 多级缓存 &#x2F; 限流</td>
+</tr>
+</tbody></table>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 缓存穿透：缓存空值</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_user_with_null_cache</span>(<span class="params">user_id</span>):</span><br><span class="line">    user = redis.get(<span class="string">f&quot;user:<span class="subst">&#123;user_id&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="keyword">if</span> user <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">return</span> user <span class="keyword">if</span> user != <span class="string">&quot;NULL&quot;</span> <span class="keyword">else</span> <span class="literal">None</span></span><br><span class="line">    user = db.query(...)</span><br><span class="line">    <span class="keyword">if</span> user:</span><br><span class="line">        redis.setex(<span class="string">f&quot;user:<span class="subst">&#123;user_id&#125;</span>&quot;</span>, <span class="number">3600</span>, user)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        redis.setex(<span class="string">f&quot;user:<span class="subst">&#123;user_id&#125;</span>&quot;</span>, <span class="number">60</span>, <span class="string">&quot;NULL&quot;</span>)  <span class="comment"># 空值也缓存，短过期</span></span><br><span class="line">    <span class="keyword">return</span> user</span><br><span class="line"></span><br><span class="line"><span class="comment"># 缓存击穿：互斥锁</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_hot_data</span>(<span class="params">key</span>):</span><br><span class="line">    data = redis.get(key)</span><br><span class="line">    <span class="keyword">if</span> data <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">        <span class="comment"># 加锁，只有一个线程查 DB</span></span><br><span class="line">        <span class="keyword">if</span> redis.setnx(<span class="string">f&quot;lock:<span class="subst">&#123;key&#125;</span>&quot;</span>, <span class="number">1</span>):</span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                data = db.query(...)</span><br><span class="line">                redis.setex(key, <span class="number">3600</span>, data)</span><br><span class="line">            <span class="keyword">finally</span>:</span><br><span class="line">                redis.delete(<span class="string">f&quot;lock:<span class="subst">&#123;key&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            time.sleep(<span class="number">0.1</span>)</span><br><span class="line">            data = redis.get(key)</span><br><span class="line">    <span class="keyword">return</span> data</span><br><span class="line"></span><br><span class="line"><span class="comment"># 缓存雪崩：过期时间加随机</span></span><br><span class="line">redis.setex(<span class="string">f&quot;user:<span class="subst">&#123;user_id&#125;</span>&quot;</span>, <span class="number">3600</span> + random.randint(<span class="number">0</span>, <span class="number">600</span>), user)</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="十六、慢查询监控与分析"><a href="#十六、慢查询监控与分析" class="headerlink" title="十六、慢查询监控与分析"></a>十六、慢查询监控与分析</h2><h3 id="16-1-慢查询日志配置"><a href="#16-1-慢查询日志配置" class="headerlink" title="16.1 慢查询日志配置"></a>16.1 慢查询日志配置</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 查看慢查询配置</span></span><br><span class="line"><span class="keyword">SHOW</span> VARIABLES <span class="keyword">LIKE</span> <span class="string">&#x27;slow_query%&#x27;</span>;</span><br><span class="line"><span class="keyword">SHOW</span> VARIABLES <span class="keyword">LIKE</span> <span class="string">&#x27;long_query_time&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 临时开启</span></span><br><span class="line"><span class="keyword">SET</span> <span class="keyword">GLOBAL</span> slow_query_log <span class="operator">=</span> <span class="number">1</span>;</span><br><span class="line"><span class="keyword">SET</span> <span class="keyword">GLOBAL</span> long_query_time <span class="operator">=</span> <span class="number">1</span>;  <span class="comment">-- 新连接生效</span></span><br><span class="line"><span class="keyword">SET</span> <span class="keyword">GLOBAL</span> log_queries_not_using_indexes <span class="operator">=</span> <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看慢查询日志位置</span></span><br><span class="line"><span class="keyword">SHOW</span> VARIABLES <span class="keyword">LIKE</span> <span class="string">&#x27;slow_query_log_file&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="16-2-pt-query-digest-分析慢查询"><a href="#16-2-pt-query-digest-分析慢查询" class="headerlink" title="16.2 pt-query-digest 分析慢查询"></a>16.2 pt-query-digest 分析慢查询</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 分析慢查询日志</span></span><br><span class="line">pt-query-digest /var/log/mysql/slow.log &gt; slow_report.txt</span><br><span class="line"></span><br><span class="line"><span class="comment"># 分析指定时间段</span></span><br><span class="line">pt-query-digest \</span><br><span class="line">  --since <span class="string">&#x27;2024-01-01 00:00:00&#x27;</span> \</span><br><span class="line">  --<span class="keyword">until</span> <span class="string">&#x27;2024-01-02 00:00:00&#x27;</span> \</span><br><span class="line">  /var/log/mysql/slow.log &gt; slow_report.txt</span><br><span class="line"></span><br><span class="line"><span class="comment"># 分析 tcpdump 抓包</span></span><br><span class="line">tcpdump -i eth0 port 3306 -s 65535 -w mysql.pcap</span><br><span class="line">pt-query-digest --<span class="built_in">type</span> tcpdump mysql.pcap &gt; report.txt</span><br></pre></td></tr></table></figure>
+
+<h3 id="16-3-Performance-Schema-分析"><a href="#16-3-Performance-Schema-分析" class="headerlink" title="16.3 Performance Schema 分析"></a>16.3 Performance Schema 分析</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 哪些 SQL 执行次数最多</span></span><br><span class="line"><span class="keyword">SELECT</span> </span><br><span class="line">    DIGEST_TEXT,</span><br><span class="line">    COUNT_STAR <span class="keyword">AS</span> exec_count,</span><br><span class="line">    AVG_TIMER_WAIT <span class="operator">/</span> <span class="number">1000000000</span> <span class="keyword">AS</span> avg_ms,</span><br><span class="line">    SUM_TIMER_WAIT <span class="operator">/</span> <span class="number">1000000000</span> <span class="keyword">AS</span> total_ms,</span><br><span class="line">    SUM_ROWS_EXAMINED <span class="keyword">AS</span> total_rows_examined,</span><br><span class="line">    SUM_ROWS_SENT <span class="keyword">AS</span> total_rows_sent</span><br><span class="line"><span class="keyword">FROM</span> performance_schema.events_statements_summary_by_digest</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> SUM_TIMER_WAIT <span class="keyword">DESC</span></span><br><span class="line">LIMIT <span class="number">20</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 哪些 SQL 使用了临时表</span></span><br><span class="line"><span class="keyword">SELECT</span> </span><br><span class="line">    DIGEST_TEXT,</span><br><span class="line">    COUNT_STAR,</span><br><span class="line">    SUM_CREATED_TMP_TABLES,</span><br><span class="line">    SUM_CREATED_TMP_DISK_TABLES</span><br><span class="line"><span class="keyword">FROM</span> performance_schema.events_statements_summary_by_digest</span><br><span class="line"><span class="keyword">WHERE</span> SUM_CREATED_TMP_DISK_TABLES <span class="operator">&gt;</span> <span class="number">0</span></span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> SUM_CREATED_TMP_DISK_TABLES <span class="keyword">DESC</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="16-4-Sys-Schema-分析"><a href="#16-4-Sys-Schema-分析" class="headerlink" title="16.4 Sys Schema 分析"></a>16.4 Sys Schema 分析</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- Top N 最慢 SQL</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> sys.statements_with_runtimes_in_95th_percentile</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> avg_latency <span class="keyword">DESC</span> LIMIT <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 全表扫描最多的表</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> sys.schema_tables_with_full_table_scans;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 冗余索引</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> sys.schema_redundant_indexes;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 未使用的索引</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> sys.schema_unused_indexes;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 哪些表的 I/O 最多</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> sys.io_global_by_file_by_bytes LIMIT <span class="number">20</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 锁等待</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> sys.innodb_lock_waits;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="十七、常见-SQL-反模式"><a href="#十七、常见-SQL-反模式" class="headerlink" title="十七、常见 SQL 反模式"></a>十七、常见 SQL 反模式</h2><h3 id="反模式-1：随意使用-SELECT"><a href="#反模式-1：随意使用-SELECT" class="headerlink" title="反模式 1：随意使用 SELECT *"></a>反模式 1：随意使用 SELECT *</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ❌</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> orders <span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="number">1</span>;</span><br><span class="line"><span class="comment">-- ✅</span></span><br><span class="line"><span class="keyword">SELECT</span> id, order_no, amount, status <span class="keyword">FROM</span> orders <span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="反模式-2：在-WHERE-中对列做运算"><a href="#反模式-2：在-WHERE-中对列做运算" class="headerlink" title="反模式 2：在 WHERE 中对列做运算"></a>反模式 2：在 WHERE 中对列做运算</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ❌ (索引失效)</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> <span class="keyword">YEAR</span>(birthday) <span class="operator">=</span> <span class="number">1990</span>;</span><br><span class="line"><span class="comment">-- ✅</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> birthday <span class="operator">&gt;=</span> <span class="string">&#x27;1990-01-01&#x27;</span> <span class="keyword">AND</span> birthday <span class="operator">&lt;</span> <span class="string">&#x27;1991-01-01&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="反模式-3：使用大量-OR-条件"><a href="#反模式-3：使用大量-OR-条件" class="headerlink" title="反模式 3：使用大量 OR 条件"></a>反模式 3：使用大量 OR 条件</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ❌</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="number">1</span> <span class="keyword">OR</span> id <span class="operator">=</span> <span class="number">2</span> <span class="keyword">OR</span> id <span class="operator">=</span> <span class="number">3</span> <span class="keyword">OR</span> id <span class="operator">=</span> <span class="number">4</span> ...;</span><br><span class="line"><span class="comment">-- ✅</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> id <span class="keyword">IN</span> (<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, ...);</span><br></pre></td></tr></table></figure>
+
+<h3 id="反模式-4：无-LIMIT-的查询"><a href="#反模式-4：无-LIMIT-的查询" class="headerlink" title="反模式 4：无 LIMIT 的查询"></a>反模式 4：无 LIMIT 的查询</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ❌ 可能返回几百万行</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> orders <span class="keyword">WHERE</span> status <span class="operator">=</span> <span class="number">1</span>;</span><br><span class="line"><span class="comment">-- ✅ 加 LIMIT，配合分页</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> orders <span class="keyword">WHERE</span> status <span class="operator">=</span> <span class="number">1</span> LIMIT <span class="number">100</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="反模式-5：过度依赖数据库函数处理"><a href="#反模式-5：过度依赖数据库函数处理" class="headerlink" title="反模式 5：过度依赖数据库函数处理"></a>反模式 5：过度依赖数据库函数处理</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ❌ 大量数据在 DB 层做字符串拼接、格式化</span></span><br><span class="line"><span class="keyword">SELECT</span> CONCAT(u.first_name, <span class="string">&#x27; &#x27;</span>, u.last_name, <span class="string">&#x27; - &#x27;</span>, u.phone) <span class="keyword">FROM</span> users u;</span><br><span class="line"><span class="comment">-- ✅ 在应用层处理格式化，DB 只做数据检索</span></span><br><span class="line"><span class="keyword">SELECT</span> u.first_name, u.last_name, u.phone <span class="keyword">FROM</span> users u;</span><br></pre></td></tr></table></figure>
+
+<h3 id="反模式-6：NULL-值设计问题"><a href="#反模式-6：NULL-值设计问题" class="headerlink" title="反模式 6：NULL 值设计问题"></a>反模式 6：NULL 值设计问题</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ❌ 到处 NULL 加复杂判断</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> deleted_at <span class="keyword">IS</span> <span class="keyword">NOT NULL</span> <span class="keyword">OR</span> status <span class="keyword">IS</span> <span class="keyword">NULL</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 合理设默认值</span></span><br><span class="line"><span class="comment">-- deleted_at DATETIME NOT NULL DEFAULT &#x27;9999-12-31&#x27;</span></span><br><span class="line"><span class="comment">-- status TINYINT NOT NULL DEFAULT 0</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> deleted_at <span class="operator">=</span> <span class="string">&#x27;9999-12-31&#x27;</span> <span class="keyword">AND</span> status <span class="operator">=</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="反模式-7：用-MySQL-做全文搜索"><a href="#反模式-7：用-MySQL-做全文搜索" class="headerlink" title="反模式 7：用 MySQL 做全文搜索"></a>反模式 7：用 MySQL 做全文搜索</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ❌ LIKE &#x27;%keyword%&#x27;（全表扫描，极慢）</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> articles <span class="keyword">WHERE</span> content <span class="keyword">LIKE</span> <span class="string">&#x27;%关键词%&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 方案 A：Elasticsearch / Meilisearch</span></span><br><span class="line"><span class="comment">-- ✅ 方案 B：MySQL 内置全文索引（中文需配合 ngram parser）</span></span><br><span class="line"><span class="keyword">ALTER TABLE</span> articles <span class="keyword">ADD</span> FULLTEXT INDEX ft_content (content) <span class="keyword">WITH</span> PARSER ngram;</span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> articles <span class="keyword">WHERE</span> <span class="keyword">MATCH</span>(content) AGAINST(<span class="string">&#x27;关键词&#x27;</span> <span class="keyword">IN</span> <span class="type">BOOLEAN</span> MODE);</span><br></pre></td></tr></table></figure>
+
+<h3 id="反模式-8：大数据量导出"><a href="#反模式-8：大数据量导出" class="headerlink" title="反模式 8：大数据量导出"></a>反模式 8：大数据量导出</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ❌ 一次性导出几百万行</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">INTO</span> OUTFILE <span class="string">&#x27;/tmp/export.csv&#x27;</span> <span class="keyword">FROM</span> orders;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 分批次导出（使用 LIMIT 游标）</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="反模式-9：滥用存储过程-函数"><a href="#反模式-9：滥用存储过程-函数" class="headerlink" title="反模式 9：滥用存储过程&#x2F;函数"></a>反模式 9：滥用存储过程&#x2F;函数</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ❌ 复杂业务逻辑写在存储过程中</span></span><br><span class="line"><span class="comment">-- 问题：难以版本管理、调试困难、测试困难、耦合度高</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 业务逻辑放应用层，DB 只做 CRUD</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="反模式-10：JSON-字段代替关联表"><a href="#反模式-10：JSON-字段代替关联表" class="headerlink" title="反模式 10：JSON 字段代替关联表"></a>反模式 10：JSON 字段代替关联表</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ⚠️ JSON 的合理场景：</span></span><br><span class="line"><span class="comment">-- - 结构多变、无强模式的附加属性（如用户扩展信息）</span></span><br><span class="line"><span class="comment">-- - 不需要按 JSON 内部字段频繁查询/排序</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- ❌ 不合理的 JSON 使用</span></span><br><span class="line"><span class="comment">-- 经常需要 WHERE json_col-&gt;&gt;&#x27;$.status&#x27; = &#x27;active&#x27; → 无法使用索引</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 合理做法</span></span><br><span class="line"><span class="comment">-- 核心业务字段独立建列 + 索引</span></span><br><span class="line"><span class="comment">-- 次要/多变的属性用 JSON（MySQL 5.7+ 虚拟列+索引辅助查询）</span></span><br><span class="line"><span class="keyword">ALTER TABLE</span> users <span class="keyword">ADD</span> status TINYINT <span class="keyword">NOT NULL</span> <span class="keyword">DEFAULT</span> <span class="number">0</span>, <span class="keyword">ADD</span> INDEX idx_status(status);</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="十八、实战案例分析"><a href="#十八、实战案例分析" class="headerlink" title="十八、实战案例分析"></a>十八、实战案例分析</h2><h3 id="案例-1：订单列表查询优化"><a href="#案例-1：订单列表查询优化" class="headerlink" title="案例 1：订单列表查询优化"></a>案例 1：订单列表查询优化</h3><p><strong>原始场景</strong>：订单表 500W 行，用户查看自己的订单列表。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ❌ 原始 SQL（1.8 秒）</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> orders </span><br><span class="line"><span class="keyword">WHERE</span> user_id <span class="operator">=</span> <span class="number">12345</span> </span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> created_at <span class="keyword">DESC</span> </span><br><span class="line">LIMIT <span class="number">10</span>, <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 问题分析：</span></span><br><span class="line"><span class="comment">-- EXPLAIN → type: ref, key: idx_user_id, Extra: Using filesort</span></span><br><span class="line"><span class="comment">-- rows: 35000（该用户有 3.5W 订单）</span></span><br><span class="line"><span class="comment">-- 因为没有 (user_id, created_at) 联合索引，需要 filesort</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 优化 1：建联合索引</span></span><br><span class="line"><span class="keyword">ALTER TABLE</span> orders <span class="keyword">ADD</span> INDEX idx_user_time (user_id, created_at);</span><br><span class="line"><span class="comment">-- 优化后：0.02 秒（Using index，无 filesort）</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 优化 2：只取必要字段 + 覆盖索引</span></span><br><span class="line"><span class="keyword">ALTER TABLE</span> orders <span class="keyword">ADD</span> INDEX idx_user_time_cover (user_id, created_at, id, order_no, amount, status);</span><br><span class="line"><span class="keyword">SELECT</span> id, order_no, amount, status, created_at </span><br><span class="line"><span class="keyword">FROM</span> orders </span><br><span class="line"><span class="keyword">WHERE</span> user_id <span class="operator">=</span> <span class="number">12345</span> </span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> created_at <span class="keyword">DESC</span> </span><br><span class="line">LIMIT <span class="number">10</span>, <span class="number">10</span>;</span><br><span class="line"><span class="comment">-- 优化后：0.005 秒（Using index，覆盖索引无回表）</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="案例-2：统计报表优化"><a href="#案例-2：统计报表优化" class="headerlink" title="案例 2：统计报表优化"></a>案例 2：统计报表优化</h3><p><strong>原始场景</strong>：每日统计过去 30 天的订单量和金额。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ❌ 原始 SQL（5.2 秒）</span></span><br><span class="line"><span class="keyword">SELECT</span> </span><br><span class="line">    <span class="type">DATE</span>(created_at) <span class="keyword">AS</span> <span class="type">date</span>,</span><br><span class="line">    <span class="built_in">COUNT</span>(<span class="operator">*</span>) <span class="keyword">AS</span> order_count,</span><br><span class="line">    <span class="built_in">SUM</span>(amount) <span class="keyword">AS</span> total_amount</span><br><span class="line"><span class="keyword">FROM</span> orders</span><br><span class="line"><span class="keyword">WHERE</span> created_at <span class="operator">&gt;=</span> DATE_SUB(NOW(), <span class="type">INTERVAL</span> <span class="number">30</span> <span class="keyword">DAY</span>)</span><br><span class="line"><span class="keyword">GROUP</span> <span class="keyword">BY</span> <span class="type">DATE</span>(created_at)</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> <span class="type">date</span> <span class="keyword">DESC</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 问题：DATE() 函数导致索引失效 + 全表扫描</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 优化：避免函数 + 覆盖索引</span></span><br><span class="line"><span class="keyword">SELECT</span> </span><br><span class="line">    <span class="type">DATE</span>(created_at) <span class="keyword">AS</span> <span class="type">date</span>,</span><br><span class="line">    <span class="built_in">COUNT</span>(<span class="operator">*</span>) <span class="keyword">AS</span> order_count,</span><br><span class="line">    <span class="built_in">SUM</span>(amount) <span class="keyword">AS</span> total_amount</span><br><span class="line"><span class="keyword">FROM</span> orders</span><br><span class="line"><span class="keyword">WHERE</span> created_at <span class="operator">&gt;=</span> DATE_FORMAT(DATE_SUB(NOW(), <span class="type">INTERVAL</span> <span class="number">30</span> <span class="keyword">DAY</span>), <span class="string">&#x27;%Y-%m-%d 00:00:00&#x27;</span>)</span><br><span class="line"><span class="keyword">GROUP</span> <span class="keyword">BY</span> <span class="type">DATE</span>(created_at)</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> <span class="type">date</span> <span class="keyword">DESC</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 更进一步：预计算汇总表 + 定时任务</span></span><br><span class="line"><span class="keyword">CREATE TABLE</span> order_daily_stats (</span><br><span class="line">    stat_date   <span class="type">DATE</span> <span class="keyword">NOT NULL</span> <span class="keyword">PRIMARY KEY</span>,</span><br><span class="line">    order_count <span class="type">INT</span> UNSIGNED <span class="keyword">NOT NULL</span> <span class="keyword">DEFAULT</span> <span class="number">0</span>,</span><br><span class="line">    total_amount <span class="type">DECIMAL</span>(<span class="number">15</span>,<span class="number">2</span>) <span class="keyword">NOT NULL</span> <span class="keyword">DEFAULT</span> <span class="number">0.00</span></span><br><span class="line">) ENGINE<span class="operator">=</span>InnoDB;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 每日凌晨执行</span></span><br><span class="line"><span class="keyword">INSERT INTO</span> order_daily_stats (stat_date, order_count, total_amount)</span><br><span class="line"><span class="keyword">SELECT</span> <span class="type">DATE</span>(created_at), <span class="built_in">COUNT</span>(<span class="operator">*</span>), <span class="built_in">SUM</span>(amount)</span><br><span class="line"><span class="keyword">FROM</span> orders</span><br><span class="line"><span class="keyword">WHERE</span> <span class="type">DATE</span>(created_at) <span class="operator">=</span> CURDATE() <span class="operator">-</span> <span class="type">INTERVAL</span> <span class="number">1</span> <span class="keyword">DAY</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查询改为 O(1)</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> order_daily_stats </span><br><span class="line"><span class="keyword">WHERE</span> stat_date <span class="operator">&gt;=</span> CURDATE() <span class="operator">-</span> <span class="type">INTERVAL</span> <span class="number">30</span> <span class="keyword">DAY</span></span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> stat_date <span class="keyword">DESC</span>;</span><br><span class="line"><span class="comment">-- 优化后：0.001 秒</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="案例-3：多表关联优化"><a href="#案例-3：多表关联优化" class="headerlink" title="案例 3：多表关联优化"></a>案例 3：多表关联优化</h3><p><strong>原始场景</strong>：4 表 JOIN 查询活动参与用户列表。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ❌ 原始 SQL（3.8 秒）</span></span><br><span class="line"><span class="keyword">SELECT</span> u.<span class="operator">*</span>, a.title, p.prize_name, l.created_at <span class="keyword">AS</span> join_time</span><br><span class="line"><span class="keyword">FROM</span> activity_log l</span><br><span class="line"><span class="keyword">LEFT</span> <span class="keyword">JOIN</span> users u <span class="keyword">ON</span> l.user_id <span class="operator">=</span> u.id</span><br><span class="line"><span class="keyword">LEFT</span> <span class="keyword">JOIN</span> activities a <span class="keyword">ON</span> l.activity_id <span class="operator">=</span> a.id</span><br><span class="line"><span class="keyword">LEFT</span> <span class="keyword">JOIN</span> prizes p <span class="keyword">ON</span> l.prize_id <span class="operator">=</span> p.id</span><br><span class="line"><span class="keyword">WHERE</span> l.activity_id <span class="operator">=</span> <span class="number">100</span></span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> l.created_at <span class="keyword">DESC</span></span><br><span class="line">LIMIT <span class="number">20</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 问题分析：</span></span><br><span class="line"><span class="comment">-- EXPLAIN 显示 activity_log 全表扫描（200W 行）</span></span><br><span class="line"><span class="comment">-- 缺少 activity_id 索引</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 优化：</span></span><br><span class="line"><span class="comment">-- 1. 添加索引</span></span><br><span class="line"><span class="keyword">ALTER TABLE</span> activity_log <span class="keyword">ADD</span> INDEX idx_activity_time (activity_id, created_at);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 2. 减少 JOIN，分批查询</span></span><br><span class="line"><span class="comment">-- Step 1：查日志</span></span><br><span class="line"><span class="keyword">SELECT</span> id, user_id, prize_id, created_at</span><br><span class="line"><span class="keyword">FROM</span> activity_log</span><br><span class="line"><span class="keyword">WHERE</span> activity_id <span class="operator">=</span> <span class="number">100</span></span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> created_at <span class="keyword">DESC</span></span><br><span class="line">LIMIT <span class="number">20</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- Step 2：查关联表（IN 查询）</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> id <span class="keyword">IN</span> (uid1, uid2, ...);</span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> prizes <span class="keyword">WHERE</span> id <span class="keyword">IN</span> (pid1, pid2, ...);</span><br><span class="line"><span class="comment">-- 活动信息可缓存（变化少）</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 优化后：总体 &lt; 0.1 秒</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="案例-4：高并发库存扣减"><a href="#案例-4：高并发库存扣减" class="headerlink" title="案例 4：高并发库存扣减"></a>案例 4：高并发库存扣减</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ❌ 先查再扣（并发下超卖）</span></span><br><span class="line"><span class="comment">-- 线程 A：SELECT stock FROM products WHERE id = 1;  -- stock = 10</span></span><br><span class="line"><span class="comment">-- 线程 B：SELECT stock FROM products WHERE id = 1;  -- stock = 10</span></span><br><span class="line"><span class="comment">-- 线程 A：UPDATE products SET stock = 9 WHERE id = 1;</span></span><br><span class="line"><span class="comment">-- 线程 B：UPDATE products SET stock = 9 WHERE id = 1;  -- 超卖！</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 原子操作</span></span><br><span class="line"><span class="keyword">UPDATE</span> products <span class="keyword">SET</span> stock <span class="operator">=</span> stock <span class="operator">-</span> <span class="number">1</span> </span><br><span class="line"><span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="number">1</span> <span class="keyword">AND</span> stock <span class="operator">&gt;=</span> <span class="number">1</span>;</span><br><span class="line"><span class="comment">-- 检查 affected_rows，为 0 说明库存不足</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 或用乐观锁（版本号）</span></span><br><span class="line"><span class="keyword">UPDATE</span> products </span><br><span class="line"><span class="keyword">SET</span> stock <span class="operator">=</span> stock <span class="operator">-</span> <span class="number">1</span>, version <span class="operator">=</span> version <span class="operator">+</span> <span class="number">1</span></span><br><span class="line"><span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="number">1</span> <span class="keyword">AND</span> version <span class="operator">=</span> <span class="variable">@old_version</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ✅ 高并发场景：Redis + Lua 脚本原子扣减</span></span><br><span class="line"><span class="comment">-- EVAL &quot;if redis.call(&#x27;get&#x27;, KEYS[1]) &gt;= ARGV[1] then </span></span><br><span class="line"><span class="comment">--         return redis.call(&#x27;decrby&#x27;, KEYS[1], ARGV[1]) </span></span><br><span class="line"><span class="comment">--       else return -1 end&quot; 1 stock:1 1</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="十九、不同数据库的优化差异"><a href="#十九、不同数据库的优化差异" class="headerlink" title="十九、不同数据库的优化差异"></a>十九、不同数据库的优化差异</h2><h3 id="19-1-MySQL-vs-PostgreSQL"><a href="#19-1-MySQL-vs-PostgreSQL" class="headerlink" title="19.1 MySQL vs PostgreSQL"></a>19.1 MySQL vs PostgreSQL</h3><table>
+<thead>
+<tr>
+<th>方面</th>
+<th>MySQL</th>
+<th>PostgreSQL</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>默认隔离级别</td>
+<td>REPEATABLE READ</td>
+<td>READ COMMITTED</td>
+</tr>
+<tr>
+<td>MVCC 实现</td>
+<td>Undo Log</td>
+<td>元组多版本</td>
+</tr>
+<tr>
+<td>JOIN 算法</td>
+<td>NLJ &#x2F; Hash(8.0.18+)</td>
+<td>NLJ &#x2F; Hash &#x2F; Merge</td>
+</tr>
+<tr>
+<td>查询计划</td>
+<td>EXPLAIN</td>
+<td>EXPLAIN ANALYZE（更详细）</td>
+</tr>
+<tr>
+<td>索引类型</td>
+<td>B+Tree &#x2F; FullText &#x2F; Spatial</td>
+<td>B-Tree &#x2F; Hash &#x2F; GIN &#x2F; GiST &#x2F; BRIN &#x2F; SP-GiST</td>
+</tr>
+<tr>
+<td>分区</td>
+<td>有限支持</td>
+<td>更强大（声明式分区）</td>
+</tr>
+<tr>
+<td>并行查询</td>
+<td>有限（8.0+）</td>
+<td>原生支持（9.6+）</td>
+</tr>
+<tr>
+<td>JSON</td>
+<td>JSON 类型</td>
+<td>JSONB（更高效）</td>
+</tr>
+<tr>
+<td>分析函数</td>
+<td>8.0+ 支持</td>
+<td>完善支持</td>
+</tr>
+</tbody></table>
+<h3 id="19-2-MySQL-版本差异"><a href="#19-2-MySQL-版本差异" class="headerlink" title="19.2 MySQL 版本差异"></a>19.2 MySQL 版本差异</h3><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>5.6</th>
+<th>5.7</th>
+<th>8.0</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Online DDL</td>
+<td>部分支持</td>
+<td>增强</td>
+<td>完善</td>
+</tr>
+<tr>
+<td>JSON 类型</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅（增强）</td>
+</tr>
+<tr>
+<td>CTE (WITH)</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>窗口函数</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Hash Join</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅ (8.0.18)</td>
+</tr>
+<tr>
+<td>降序索引</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>原子 DDL</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>资源组</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>直方图</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>EXPLAIN ANALYZE</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅ (8.0.18)</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="附录-A：优化检查清单（速查）"><a href="#附录-A：优化检查清单（速查）" class="headerlink" title="附录 A：优化检查清单（速查）"></a>附录 A：优化检查清单（速查）</h2><h3 id="日常开发检查"><a href="#日常开发检查" class="headerlink" title="日常开发检查"></a>日常开发检查</h3><ul>
+<li><input disabled="" type="checkbox"> SELECT 是否避免了 <code>*</code>？</li>
+<li><input disabled="" type="checkbox"> WHERE 条件列是否有索引？是否违反最左前缀？</li>
+<li><input disabled="" type="checkbox"> WHERE 中是否对索引列使用了函数&#x2F;运算&#x2F;隐式转换？</li>
+<li><input disabled="" type="checkbox"> JOIN 的关联列是否都有索引？类型是否一致？</li>
+<li><input disabled="" type="checkbox"> 大表查询是否加了 LIMIT？</li>
+<li><input disabled="" type="checkbox"> 子查询是否能改写为 JOIN？</li>
+<li><input disabled="" type="checkbox"> ORDER BY &#x2F; GROUP BY 是否有对应索引？</li>
+<li><input disabled="" type="checkbox"> 是否避免了 NOT IN 子查询（NULL 陷阱）？</li>
+<li><input disabled="" type="checkbox"> OR 条件是否能改为 IN 或 UNION ALL？</li>
+<li><input disabled="" type="checkbox"> 是否使用了合适的数据类型？</li>
+</ul>
+<h3 id="上线前检查"><a href="#上线前检查" class="headerlink" title="上线前检查"></a>上线前检查</h3><ul>
+<li><input disabled="" type="checkbox"> 对核心 SQL 执行了 EXPLAIN，type 是否达到 ref 或以上？</li>
+<li><input disabled="" type="checkbox"> 是否模拟了线上数据量（≥ 预估 3 个月后的量）做压测？</li>
+<li><input disabled="" type="checkbox"> 新加的索引是否避免了冗余和未使用？</li>
+<li><input disabled="" type="checkbox"> 是否有慢查询监控和告警？</li>
+<li><input disabled="" type="checkbox"> 事务是否足够短？是否有长事务风险？</li>
+<li><input disabled="" type="checkbox"> 是否有死锁风险（多表更新顺序一致）？</li>
+</ul>
+<hr>
+<h2 id="附录-B：常用-SQL-性能排查命令速查"><a href="#附录-B：常用-SQL-性能排查命令速查" class="headerlink" title="附录 B：常用 SQL 性能排查命令速查"></a>附录 B：常用 SQL 性能排查命令速查</h2><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 1. 查看当前所有连接</span></span><br><span class="line"><span class="keyword">SHOW</span> <span class="keyword">FULL</span> PROCESSLIST;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 2. 查看当前事务</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> information_schema.innodb_trx <span class="keyword">WHERE</span> trx_state <span class="operator">=</span> <span class="string">&#x27;RUNNING&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 3. 查看锁等待（MySQL 8.0+）</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> performance_schema.data_lock_waits;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 4. 查看 Buffer Pool 使用率</span></span><br><span class="line"><span class="keyword">SHOW</span> STATUS <span class="keyword">LIKE</span> <span class="string">&#x27;Innodb_buffer_pool%&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 5. 查看表统计信息</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> mysql.innodb_table_stats <span class="keyword">WHERE</span> database_name <span class="operator">=</span> <span class="string">&#x27;your_db&#x27;</span>;</span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> mysql.innodb_index_stats <span class="keyword">WHERE</span> database_name <span class="operator">=</span> <span class="string">&#x27;your_db&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 6. 更新统计信息</span></span><br><span class="line">ANALYZE <span class="keyword">TABLE</span> your_table;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 7. 查看表大小（Top 10）</span></span><br><span class="line"><span class="keyword">SELECT</span> </span><br><span class="line">    table_schema, table_name,</span><br><span class="line">    ROUND(data_length<span class="operator">/</span><span class="number">1024</span><span class="operator">/</span><span class="number">1024</span>, <span class="number">2</span>) <span class="keyword">AS</span> data_mb,</span><br><span class="line">    ROUND(index_length<span class="operator">/</span><span class="number">1024</span><span class="operator">/</span><span class="number">1024</span>, <span class="number">2</span>) <span class="keyword">AS</span> index_mb,</span><br><span class="line">    ROUND((data_length <span class="operator">+</span> index_length)<span class="operator">/</span><span class="number">1024</span><span class="operator">/</span><span class="number">1024</span>, <span class="number">2</span>) <span class="keyword">AS</span> total_mb,</span><br><span class="line">    table_rows</span><br><span class="line"><span class="keyword">FROM</span> information_schema.tables</span><br><span class="line"><span class="keyword">WHERE</span> table_schema <span class="keyword">NOT</span> <span class="keyword">IN</span> (<span class="string">&#x27;mysql&#x27;</span>,<span class="string">&#x27;sys&#x27;</span>,<span class="string">&#x27;performance_schema&#x27;</span>,<span class="string">&#x27;information_schema&#x27;</span>)</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> (data_length <span class="operator">+</span> index_length) <span class="keyword">DESC</span></span><br><span class="line">LIMIT <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 8. 查看数据库连接数</span></span><br><span class="line"><span class="keyword">SHOW</span> STATUS <span class="keyword">LIKE</span> <span class="string">&#x27;Threads_connected&#x27;</span>;</span><br><span class="line"><span class="keyword">SHOW</span> VARIABLES <span class="keyword">LIKE</span> <span class="string">&#x27;max_connections&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 9. 查看临时表使用情况</span></span><br><span class="line"><span class="keyword">SHOW</span> STATUS <span class="keyword">LIKE</span> <span class="string">&#x27;Created_tmp%&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 10. 查看排序情况</span></span><br><span class="line"><span class="keyword">SHOW</span> STATUS <span class="keyword">LIKE</span> <span class="string">&#x27;Sort%&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p><em>本文整理自日常开发中的 SQL 优化实践经验，涵盖了从索引设计到架构层面的全方位优化策略，建议收藏作为日常开发的速查手册。</em></p>
+]]></content>
+      <categories>
+        <category>后端开发</category>
+      </categories>
+      <tags>
+        <tag>MySQL</tag>
+        <tag>SQL优化</tag>
+        <tag>数据库</tag>
+        <tag>性能调优</tag>
+        <tag>索引</tag>
+      </tags>
+  </entry>
 </search>
