@@ -22,7 +22,7 @@
 <p>将上述代码保存为 <code>.html</code> 文件即可直接在浏览器中打开，修改其中的模拟数据替换为真实 API 即可接入实际业务。</p>
 ]]></content>
       <categories>
-        <category>编程工具</category>
+        <category>编程项目</category>
       </categories>
       <tags>
         <tag>前端</tag>
@@ -57,7 +57,7 @@
 <p>以上流水线可以直接套用到大多数结构化数据处理场景中，作为项目初始的 <code>data_preprocess.py</code> 模板使用。</p>
 ]]></content>
       <categories>
-        <category>编程工具</category>
+        <category>编程学习</category>
       </categories>
       <tags>
         <tag>Python</tag>
@@ -120,7 +120,7 @@
 <p>这套架构可直接作为企业报表平台的基础框架，后续可按需扩展用户认证、权限管理、报表导出（PDF&#x2F;Excel）、定时邮件推送等功能。</p>
 ]]></content>
       <categories>
-        <category>编程工具</category>
+        <category>编程项目</category>
       </categories>
       <tags>
         <tag>ECharts</tag>
@@ -1305,7 +1305,7 @@
 <p><em>本文整理自日常开发中的 SQL 优化实践经验，涵盖了从索引设计到架构层面的全方位优化策略，建议收藏作为日常开发的速查手册。</em></p>
 ]]></content>
       <categories>
-        <category>后端开发</category>
+        <category>编程学习</category>
       </categories>
       <tags>
         <tag>MySQL</tag>
@@ -1921,7 +1921,7 @@
 <p><em>本文基于 FineReport 10.0&#x2F;11.0 版本编写，结合实际项目中上百个看板的优化经验总结而成。建议收藏作为报表开发日常参考手册，并在每个报表上线前对照检查清单逐项确认。</em></p>
 ]]></content>
       <categories>
-        <category>报表开发</category>
+        <category>编程学习</category>
       </categories>
       <tags>
         <tag>性能调优</tag>
@@ -2637,7 +2637,7 @@
 <p><em>本文覆盖了五大主流关系型数据库在日常开发中最常见的语法差异。建议收藏作为跨数据库开发的速查手册，在技术选型、系统迁移、多数据库适配等场景下快速检索。</em></p>
 ]]></content>
       <categories>
-        <category>后端开发</category>
+        <category>编程学习</category>
       </categories>
       <tags>
         <tag>MySQL</tag>
