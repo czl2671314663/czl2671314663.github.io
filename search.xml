@@ -1931,4 +1931,722 @@
         <tag>BI</tag>
       </tags>
   </entry>
+  <entry>
+    <title>「数据库语法差异」MySQL / PostgreSQL / SQL Server / Oracle / SQLite 常用语法速查对照</title>
+    <url>/2026/05/09/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AF%AD%E6%B3%95%E5%B7%AE%E5%BC%82%E9%80%9F%E6%9F%A5%E6%8C%87%E5%8D%97/</url>
+    <content><![CDATA[<blockquote>
+<p>在切换数据库或做数据迁移时，最头疼的不是架构差异，而是那些”看似一样实则不同”的语法细节。本文以 MySQL 为基准，覆盖 PostgreSQL、SQL Server、Oracle、SQLite 五大主流数据库在分页、日期、字符串、JSON、DDL、窗口函数等 20 个维度的语法差异，适合日常速查和跨数据库开发参考。</p>
+</blockquote>
+<hr>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ol>
+<li><a href="#%E4%B8%80%E5%88%86%E9%A1%B5%E6%9F%A5%E8%AF%A2">分页查询</a></li>
+<li><a href="#%E4%BA%8C%E8%87%AA%E5%A2%9E%E4%B8%BB%E9%94%AE">自增主键</a></li>
+<li><a href="#%E4%B8%89%E6%97%A5%E6%9C%9F%E6%97%B6%E9%97%B4">日期时间</a></li>
+<li><a href="#%E5%9B%9B%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%93%8D%E4%BD%9C">字符串操作</a></li>
+<li><a href="#%E4%BA%94%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2">类型转换</a></li>
+<li><a href="#%E5%85%AD%E5%88%A4%E6%96%AD%E4%B8%8E%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6">判断与流程控制</a></li>
+<li><a href="#%E4%B8%83mergeupsert">MERGE&#x2F;UPSERT</a></li>
+<li><a href="#%E5%85%ABjson-%E5%A4%84%E7%90%86">JSON 处理</a></li>
+<li><a href="#%E4%B9%9Dddl-%E5%B8%B8%E8%A7%81%E5%B7%AE%E5%BC%82">DDL 常见差异</a></li>
+<li><a href="#%E5%8D%81%E6%9F%A5%E8%AF%A2%E8%AE%A1%E5%88%92">查询计划</a></li>
+<li><a href="#%E5%8D%81%E4%B8%80%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E6%98%A0%E5%B0%84">数据类型映射</a></li>
+<li><a href="#%E5%8D%81%E4%BA%8C%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%BC%95%E5%8F%B7%E4%B8%8E%E8%BD%AC%E4%B9%89">字符串引号与转义</a></li>
+<li><a href="#%E5%8D%81%E4%B8%89%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F">正则表达式</a></li>
+<li><a href="#%E5%8D%81%E5%9B%9B%E5%A4%9A%E8%A1%A8-join-%E7%89%B9%E6%9C%89%E8%AF%AD%E6%B3%95">多表 JOIN 特有语法</a></li>
+<li><a href="#%E5%8D%81%E4%BA%94%E7%AA%97%E5%8F%A3%E5%87%BD%E6%95%B0%E5%B7%AE%E5%BC%82">窗口函数差异</a></li>
+<li><a href="#%E5%8D%81%E5%85%AD%E5%AD%98%E5%82%A8%E8%BF%87%E7%A8%8B%E4%B8%8E%E5%87%BD%E6%95%B0">存储过程与函数</a></li>
+<li><a href="#%E5%8D%81%E4%B8%83%E4%B8%B4%E6%97%B6%E8%A1%A8">临时表</a></li>
+<li><a href="#%E5%8D%81%E5%85%ABschema%E5%BA%93%E5%B1%82%E7%BA%A7%E5%B7%AE%E5%BC%82">Schema&#x2F;库层级差异</a></li>
+<li><a href="#%E5%8D%81%E4%B9%9D%E5%86%85%E7%BD%AE%E5%87%BD%E6%95%B0%E9%80%9F%E6%9F%A5%E5%AF%B9%E7%85%A7%E8%A1%A8">内置函数速查对照表</a></li>
+<li><a href="#%E4%BA%8C%E5%8D%81%E8%B7%A8%E6%95%B0%E6%8D%AE%E5%BA%93%E5%BC%80%E5%8F%91%E5%BB%BA%E8%AE%AE">跨数据库开发建议</a></li>
+</ol>
+<hr>
+<h2 id="一、分页查询"><a href="#一、分页查询" class="headerlink" title="一、分页查询"></a>一、分页查询</h2><blockquote>
+<p>这是最常见的跨库差异，五种数据库写法完全不同。</p>
+</blockquote>
+<h3 id="MySQL-PostgreSQL-SQLite"><a href="#MySQL-PostgreSQL-SQLite" class="headerlink" title="MySQL &#x2F; PostgreSQL &#x2F; SQLite"></a>MySQL &#x2F; PostgreSQL &#x2F; SQLite</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 方式 1：LIMIT + OFFSET（三者通用）</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">ORDER</span> <span class="keyword">BY</span> id LIMIT <span class="number">10</span> <span class="keyword">OFFSET</span> <span class="number">20</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 方式 2：LIMIT 缩写</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">ORDER</span> <span class="keyword">BY</span> id LIMIT <span class="number">20</span>, <span class="number">10</span>;  <span class="comment">-- (MySQL 独有语法)</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="SQL-Server"><a href="#SQL-Server" class="headerlink" title="SQL Server"></a>SQL Server</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- SQL Server 2012+ 支持 OFFSET FETCH（推荐）</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">ORDER</span> <span class="keyword">BY</span> id <span class="keyword">OFFSET</span> <span class="number">20</span> <span class="keyword">ROWS</span> <span class="keyword">FETCH</span> NEXT <span class="number">10</span> <span class="keyword">ROWS</span> <span class="keyword">ONLY</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 旧版 SQL Server 的 TOP 子查询分页</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> (</span><br><span class="line">    <span class="keyword">SELECT</span> <span class="operator">*</span>, <span class="built_in">ROW_NUMBER</span>() <span class="keyword">OVER</span> (<span class="keyword">ORDER</span> <span class="keyword">BY</span> id) <span class="keyword">AS</span> rn <span class="keyword">FROM</span> users</span><br><span class="line">) t <span class="keyword">WHERE</span> rn <span class="keyword">BETWEEN</span> <span class="number">21</span> <span class="keyword">AND</span> <span class="number">30</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Oracle"><a href="#Oracle" class="headerlink" title="Oracle"></a>Oracle</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- Oracle 12c+ 支持 OFFSET FETCH（推荐）</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">ORDER</span> <span class="keyword">BY</span> id <span class="keyword">OFFSET</span> <span class="number">20</span> <span class="keyword">ROWS</span> <span class="keyword">FETCH</span> NEXT <span class="number">10</span> <span class="keyword">ROWS</span> <span class="keyword">ONLY</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- Oracle 11g 及以下：ROWNUM 嵌套</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> (</span><br><span class="line">    <span class="keyword">SELECT</span> t.<span class="operator">*</span>, ROWNUM rn <span class="keyword">FROM</span> (</span><br><span class="line">        <span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">ORDER</span> <span class="keyword">BY</span> id</span><br><span class="line">    ) t <span class="keyword">WHERE</span> ROWNUM <span class="operator">&lt;=</span> <span class="number">30</span></span><br><span class="line">) <span class="keyword">WHERE</span> rn <span class="operator">&gt;</span> <span class="number">20</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="分页对照速查"><a href="#分页对照速查" class="headerlink" title="分页对照速查"></a>分页对照速查</h3><table>
+<thead>
+<tr>
+<th>数据库</th>
+<th>推荐写法</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MySQL</td>
+<td><code>LIMIT 10 OFFSET 20</code></td>
+<td><code>LIMIT offset, count</code> 也支持</td>
+</tr>
+<tr>
+<td>PostgreSQL</td>
+<td><code>LIMIT 10 OFFSET 20</code></td>
+<td>与 MySQL 相同</td>
+</tr>
+<tr>
+<td>SQLite</td>
+<td><code>LIMIT 10 OFFSET 20</code></td>
+<td>与 MySQL 相同</td>
+</tr>
+<tr>
+<td>SQL Server</td>
+<td><code>OFFSET 20 ROWS FETCH NEXT 10 ROWS ONLY</code></td>
+<td>2012+</td>
+</tr>
+<tr>
+<td>Oracle</td>
+<td><code>OFFSET 20 ROWS FETCH NEXT 10 ROWS ONLY</code></td>
+<td>12c+</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="二、自增主键"><a href="#二、自增主键" class="headerlink" title="二、自增主键"></a>二、自增主键</h2><table>
+<thead>
+<tr>
+<th>数据库</th>
+<th>语法</th>
+<th>获取最后插入 ID</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MySQL</td>
+<td><code>INT AUTO_INCREMENT</code></td>
+<td><code>SELECT LAST_INSERT_ID();</code></td>
+</tr>
+<tr>
+<td>PostgreSQL</td>
+<td><code>SERIAL</code> 或 <code>INT GENERATED ALWAYS AS IDENTITY</code></td>
+<td><code>INSERT ... RETURNING id;</code> 或 <code>SELECT lastval();</code></td>
+</tr>
+<tr>
+<td>SQL Server</td>
+<td><code>INT IDENTITY(1,1)</code></td>
+<td><code>SELECT SCOPE_IDENTITY();</code> 或 <code>OUTPUT INSERTED.id</code></td>
+</tr>
+<tr>
+<td>Oracle</td>
+<td><code>INT GENERATED BY DEFAULT AS IDENTITY</code>（12c+）或 SEQUENCE</td>
+<td><code>SELECT seq_name.CURRVAL FROM DUAL;</code></td>
+</tr>
+<tr>
+<td>SQLite</td>
+<td><code>INTEGER PRIMARY KEY</code>（自带自增）</td>
+<td><code>SELECT last_insert_rowid();</code></td>
+</tr>
+</tbody></table>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ========== MySQL ==========</span></span><br><span class="line"><span class="keyword">CREATE TABLE</span> t1 (</span><br><span class="line">    id   <span class="type">INT</span> AUTO_INCREMENT <span class="keyword">PRIMARY KEY</span>,</span><br><span class="line">    name <span class="type">VARCHAR</span>(<span class="number">50</span>)</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ========== PostgreSQL ==========</span></span><br><span class="line"><span class="comment">-- 方式 1：传统 SERIAL</span></span><br><span class="line"><span class="keyword">CREATE TABLE</span> t1 (</span><br><span class="line">    id   SERIAL <span class="keyword">PRIMARY KEY</span>,</span><br><span class="line">    name <span class="type">VARCHAR</span>(<span class="number">50</span>)</span><br><span class="line">);</span><br><span class="line"><span class="comment">-- 方式 2：新标准 IDENTITY（推荐）</span></span><br><span class="line"><span class="keyword">CREATE TABLE</span> t1 (</span><br><span class="line">    id   <span class="type">INT</span> GENERATED ALWAYS <span class="keyword">AS</span> <span class="keyword">IDENTITY</span> <span class="keyword">PRIMARY KEY</span>,</span><br><span class="line">    name <span class="type">VARCHAR</span>(<span class="number">50</span>)</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ========== SQL Server ==========</span></span><br><span class="line"><span class="keyword">CREATE TABLE</span> t1 (</span><br><span class="line">    id   <span class="type">INT</span> <span class="keyword">IDENTITY</span>(<span class="number">1</span>,<span class="number">1</span>) <span class="keyword">PRIMARY KEY</span>,</span><br><span class="line">    name <span class="type">VARCHAR</span>(<span class="number">50</span>)</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ========== Oracle ==========</span></span><br><span class="line"><span class="comment">-- 12c+ IDENTITY</span></span><br><span class="line"><span class="keyword">CREATE TABLE</span> t1 (</span><br><span class="line">    id   NUMBER GENERATED <span class="keyword">BY</span> <span class="keyword">DEFAULT</span> <span class="keyword">AS</span> <span class="keyword">IDENTITY</span> <span class="keyword">PRIMARY KEY</span>,</span><br><span class="line">    name VARCHAR2(<span class="number">50</span>)</span><br><span class="line">);</span><br><span class="line"><span class="comment">-- 11g：必须手动创建 SEQUENCE + TRIGGER</span></span><br><span class="line"><span class="keyword">CREATE</span> SEQUENCE seq_t1 <span class="keyword">START</span> <span class="keyword">WITH</span> <span class="number">1</span> INCREMENT <span class="keyword">BY</span> <span class="number">1</span>;</span><br><span class="line"><span class="keyword">CREATE TABLE</span> t1 (</span><br><span class="line">    id   NUMBER <span class="keyword">PRIMARY KEY</span>,</span><br><span class="line">    name VARCHAR2(<span class="number">50</span>)</span><br><span class="line">);</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">OR</span> REPLACE <span class="keyword">TRIGGER</span> trg_t1_id</span><br><span class="line">BEFORE <span class="keyword">INSERT</span> <span class="keyword">ON</span> t1 <span class="keyword">FOR</span> <span class="keyword">EACH</span> <span class="type">ROW</span></span><br><span class="line"><span class="keyword">BEGIN</span></span><br><span class="line">    <span class="keyword">SELECT</span> seq_t1.NEXTVAL <span class="keyword">INTO</span> :NEW.id <span class="keyword">FROM</span> DUAL;</span><br><span class="line"><span class="keyword">END</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ========== SQLite ==========</span></span><br><span class="line"><span class="keyword">CREATE TABLE</span> t1 (</span><br><span class="line">    id   <span class="type">INTEGER</span> <span class="keyword">PRIMARY KEY</span>,   <span class="comment">-- INTEGER PRIMARY KEY 自动变为自增</span></span><br><span class="line">    name TEXT</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="三、日期时间"><a href="#三、日期时间" class="headerlink" title="三、日期时间"></a>三、日期时间</h2><h3 id="3-1-获取当前时间"><a href="#3-1-获取当前时间" class="headerlink" title="3.1 获取当前时间"></a>3.1 获取当前时间</h3><table>
+<thead>
+<tr>
+<th>需求</th>
+<th>MySQL</th>
+<th>PostgreSQL</th>
+<th>SQL Server</th>
+<th>Oracle</th>
+<th>SQLite</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>当前日期+时间</td>
+<td><code>NOW()</code></td>
+<td><code>NOW()</code> &#x2F; <code>CURRENT_TIMESTAMP</code></td>
+<td><code>GETDATE()</code></td>
+<td><code>SYSDATE</code></td>
+<td><code>datetime(&#39;now&#39;)</code></td>
+</tr>
+<tr>
+<td>当前日期</td>
+<td><code>CURDATE()</code></td>
+<td><code>CURRENT_DATE</code></td>
+<td><code>CAST(GETDATE() AS DATE)</code></td>
+<td><code>TRUNC(SYSDATE)</code></td>
+<td><code>date(&#39;now&#39;)</code></td>
+</tr>
+<tr>
+<td>当前时间</td>
+<td><code>CURTIME()</code></td>
+<td><code>CURRENT_TIME</code></td>
+<td><code>CAST(GETDATE() AS TIME)</code></td>
+<td>—</td>
+<td><code>time(&#39;now&#39;)</code></td>
+</tr>
+</tbody></table>
+<h3 id="3-2-日期加减"><a href="#3-2-日期加减" class="headerlink" title="3.2 日期加减"></a>3.2 日期加减</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ========== MySQL ==========</span></span><br><span class="line"><span class="keyword">SELECT</span> NOW() <span class="operator">+</span> <span class="type">INTERVAL</span> <span class="number">7</span> <span class="keyword">DAY</span>;              <span class="comment">-- 加 7 天</span></span><br><span class="line"><span class="keyword">SELECT</span> NOW() <span class="operator">-</span> <span class="type">INTERVAL</span> <span class="number">1</span> <span class="keyword">MONTH</span>;            <span class="comment">-- 减 1 月</span></span><br><span class="line"><span class="keyword">SELECT</span> DATE_ADD(NOW(), <span class="type">INTERVAL</span> <span class="number">3</span> <span class="keyword">HOUR</span>);    <span class="comment">-- 加 3 小时</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- ========== PostgreSQL ==========</span></span><br><span class="line"><span class="keyword">SELECT</span> NOW() <span class="operator">+</span> <span class="type">INTERVAL</span> <span class="string">&#x27;7 days&#x27;</span>;</span><br><span class="line"><span class="keyword">SELECT</span> NOW() <span class="operator">-</span> <span class="type">INTERVAL</span> <span class="string">&#x27;1 month&#x27;</span>;</span><br><span class="line"><span class="keyword">SELECT</span> NOW() <span class="operator">+</span> <span class="type">INTERVAL</span> <span class="string">&#x27;3 hours&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ========== SQL Server ==========</span></span><br><span class="line"><span class="keyword">SELECT</span> DATEADD(<span class="keyword">DAY</span>, <span class="number">7</span>, GETDATE());           <span class="comment">-- 加 7 天</span></span><br><span class="line"><span class="keyword">SELECT</span> DATEADD(<span class="keyword">MONTH</span>, <span class="number">-1</span>, GETDATE());        <span class="comment">-- 减 1 月</span></span><br><span class="line"><span class="keyword">SELECT</span> DATEADD(<span class="keyword">HOUR</span>, <span class="number">3</span>, GETDATE());          <span class="comment">-- 加 3 小时</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- ========== Oracle ==========</span></span><br><span class="line"><span class="keyword">SELECT</span> SYSDATE <span class="operator">+</span> <span class="number">7</span> <span class="keyword">FROM</span> DUAL;                <span class="comment">-- 加 7 天</span></span><br><span class="line"><span class="keyword">SELECT</span> ADD_MONTHS(SYSDATE, <span class="number">-1</span>) <span class="keyword">FROM</span> DUAL;    <span class="comment">-- 减 1 月</span></span><br><span class="line"><span class="keyword">SELECT</span> SYSDATE <span class="operator">+</span> <span class="number">3</span><span class="operator">/</span><span class="number">24</span> <span class="keyword">FROM</span> DUAL;             <span class="comment">-- 加 3 小时</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- ========== SQLite ==========</span></span><br><span class="line"><span class="keyword">SELECT</span> datetime(<span class="string">&#x27;now&#x27;</span>, <span class="string">&#x27;+7 days&#x27;</span>);</span><br><span class="line"><span class="keyword">SELECT</span> datetime(<span class="string">&#x27;now&#x27;</span>, <span class="string">&#x27;-1 month&#x27;</span>);</span><br><span class="line"><span class="keyword">SELECT</span> datetime(<span class="string">&#x27;now&#x27;</span>, <span class="string">&#x27;+3 hours&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-3-日期差值"><a href="#3-3-日期差值" class="headerlink" title="3.3 日期差值"></a>3.3 日期差值</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- MySQL / SQLite:</span></span><br><span class="line"><span class="keyword">SELECT</span> DATEDIFF(<span class="string">&#x27;2024-12-31&#x27;</span>, <span class="string">&#x27;2024-01-01&#x27;</span>);</span><br><span class="line"><span class="comment">-- → 365（SQLite 用 julianday 更精确）</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- PostgreSQL:</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="string">&#x27;2024-12-31&#x27;</span>::<span class="type">DATE</span> <span class="operator">-</span> <span class="string">&#x27;2024-01-01&#x27;</span>::<span class="type">DATE</span>;</span><br><span class="line"><span class="comment">-- → 365</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- SQL Server:</span></span><br><span class="line"><span class="keyword">SELECT</span> DATEDIFF(<span class="keyword">DAY</span>, <span class="string">&#x27;2024-01-01&#x27;</span>, <span class="string">&#x27;2024-12-31&#x27;</span>);</span><br><span class="line"><span class="comment">-- → 365</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- Oracle:</span></span><br><span class="line"><span class="keyword">SELECT</span> TO_DATE(<span class="string">&#x27;2024-12-31&#x27;</span>,<span class="string">&#x27;YYYY-MM-DD&#x27;</span>) <span class="operator">-</span> TO_DATE(<span class="string">&#x27;2024-01-01&#x27;</span>,<span class="string">&#x27;YYYY-MM-DD&#x27;</span>) <span class="keyword">FROM</span> DUAL;</span><br><span class="line"><span class="comment">-- → 365</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-4-格式化日期为字符串"><a href="#3-4-格式化日期为字符串" class="headerlink" title="3.4 格式化日期为字符串"></a>3.4 格式化日期为字符串</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- MySQL:</span></span><br><span class="line"><span class="keyword">SELECT</span> DATE_FORMAT(NOW(), <span class="string">&#x27;%Y-%m-%d %H:%i:%s&#x27;</span>);   <span class="comment">-- → 2024-01-15 14:30:00</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- PostgreSQL:</span></span><br><span class="line"><span class="keyword">SELECT</span> TO_CHAR(NOW(), <span class="string">&#x27;YYYY-MM-DD HH24:MI:SS&#x27;</span>);    <span class="comment">-- → 2024-01-15 14:30:00</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- SQL Server:</span></span><br><span class="line"><span class="keyword">SELECT</span> FORMAT(GETDATE(), <span class="string">&#x27;yyyy-MM-dd HH:mm:ss&#x27;</span>);   <span class="comment">-- → 2024-01-15 14:30:00</span></span><br><span class="line"><span class="comment">-- 或 CONVERT(VARCHAR, GETDATE(), 120)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- Oracle:</span></span><br><span class="line"><span class="keyword">SELECT</span> TO_CHAR(SYSDATE, <span class="string">&#x27;YYYY-MM-DD HH24:MI:SS&#x27;</span>) <span class="keyword">FROM</span> DUAL;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- SQLite:</span></span><br><span class="line"><span class="keyword">SELECT</span> strftime(<span class="string">&#x27;%Y-%m-%d %H:%M:%S&#x27;</span>, <span class="string">&#x27;now&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="四、字符串操作"><a href="#四、字符串操作" class="headerlink" title="四、字符串操作"></a>四、字符串操作</h2><h3 id="4-1-拼接字符串"><a href="#4-1-拼接字符串" class="headerlink" title="4.1 拼接字符串"></a>4.1 拼接字符串</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- MySQL:</span></span><br><span class="line"><span class="keyword">SELECT</span> CONCAT(<span class="string">&#x27;Hello&#x27;</span>, <span class="string">&#x27; &#x27;</span>, <span class="string">&#x27;World&#x27;</span>);               <span class="comment">-- → Hello World</span></span><br><span class="line"><span class="keyword">SELECT</span> CONCAT_WS(<span class="string">&#x27;-&#x27;</span>, <span class="string">&#x27;2024&#x27;</span>, <span class="string">&#x27;01&#x27;</span>, <span class="string">&#x27;15&#x27;</span>);           <span class="comment">-- → 2024-01-15</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- PostgreSQL:</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="string">&#x27;Hello&#x27;</span> <span class="operator">||</span> <span class="string">&#x27; &#x27;</span> <span class="operator">||</span> <span class="string">&#x27;World&#x27;</span>;                    <span class="comment">-- → Hello World</span></span><br><span class="line"><span class="keyword">SELECT</span> CONCAT(<span class="string">&#x27;Hello&#x27;</span>, <span class="string">&#x27; &#x27;</span>, <span class="string">&#x27;World&#x27;</span>);                <span class="comment">-- 也支持 CONCAT</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- SQL Server:</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="string">&#x27;Hello&#x27;</span> <span class="operator">+</span> <span class="string">&#x27; &#x27;</span> <span class="operator">+</span> <span class="string">&#x27;World&#x27;</span>;                      <span class="comment">-- → Hello World</span></span><br><span class="line"><span class="keyword">SELECT</span> CONCAT(<span class="string">&#x27;Hello&#x27;</span>, <span class="string">&#x27; &#x27;</span>, <span class="string">&#x27;World&#x27;</span>);                <span class="comment">-- SQL Server 2012+ 也支持</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- Oracle:</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="string">&#x27;Hello&#x27;</span> <span class="operator">||</span> <span class="string">&#x27; &#x27;</span> <span class="operator">||</span> <span class="string">&#x27;World&#x27;</span> <span class="keyword">FROM</span> DUAL;          <span class="comment">-- → Hello World</span></span><br><span class="line"><span class="keyword">SELECT</span> CONCAT(<span class="string">&#x27;Hello&#x27;</span>, CONCAT(<span class="string">&#x27; &#x27;</span>, <span class="string">&#x27;World&#x27;</span>)) <span class="keyword">FROM</span> DUAL;  <span class="comment">-- 只支持 2 个参数</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- SQLite:</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="string">&#x27;Hello&#x27;</span> <span class="operator">||</span> <span class="string">&#x27; &#x27;</span> <span class="operator">||</span> <span class="string">&#x27;World&#x27;</span>;                    <span class="comment">-- → Hello World</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="4-2-子字符串"><a href="#4-2-子字符串" class="headerlink" title="4.2 子字符串"></a>4.2 子字符串</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- MySQL / PostgreSQL / SQLite:</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="built_in">SUBSTRING</span>(<span class="string">&#x27;Hello World&#x27;</span>, <span class="number">1</span>, <span class="number">5</span>);    <span class="comment">-- → Hello（注意位置从 1 开始）</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- SQL Server:</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="built_in">SUBSTRING</span>(<span class="string">&#x27;Hello World&#x27;</span>, <span class="number">1</span>, <span class="number">5</span>);    <span class="comment">-- 同上</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- Oracle:</span></span><br><span class="line"><span class="keyword">SELECT</span> SUBSTR(<span class="string">&#x27;Hello World&#x27;</span>, <span class="number">1</span>, <span class="number">5</span>) <span class="keyword">FROM</span> DUAL;  <span class="comment">-- → Hello</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="4-3-字符串长度"><a href="#4-3-字符串长度" class="headerlink" title="4.3 字符串长度"></a>4.3 字符串长度</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- MySQL:</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">CHAR_LENGTH</span>(<span class="string">&#x27;你好世界&#x27;</span>);   <span class="comment">-- → 4（字符数）</span></span><br><span class="line"><span class="keyword">SELECT</span> LENGTH(<span class="string">&#x27;你好世界&#x27;</span>);         <span class="comment">-- → 12（字节数，UTF-8 中每个中文 3 字节）</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- PostgreSQL:</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">CHAR_LENGTH</span>(<span class="string">&#x27;你好世界&#x27;</span>);   <span class="comment">-- → 4</span></span><br><span class="line"><span class="keyword">SELECT</span> LENGTH(<span class="string">&#x27;你好世界&#x27;</span>);         <span class="comment">-- → 4（PostgreSQL 中 LENGTH 也是字符数）</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- SQL Server:</span></span><br><span class="line"><span class="keyword">SELECT</span> LEN(<span class="string">&#x27;你好世界&#x27;</span>);            <span class="comment">-- → 4（字符数）</span></span><br><span class="line"><span class="keyword">SELECT</span> DATALENGTH(<span class="string">&#x27;你好世界&#x27;</span>);     <span class="comment">-- → 12（字节数，NCHAR/NVARCHAR 中每个 2 字节）</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- Oracle:</span></span><br><span class="line"><span class="keyword">SELECT</span> LENGTH(<span class="string">&#x27;你好世界&#x27;</span>) <span class="keyword">FROM</span> DUAL;         <span class="comment">-- → 4（字符数）</span></span><br><span class="line"><span class="keyword">SELECT</span> LENGTHB(<span class="string">&#x27;你好世界&#x27;</span>) <span class="keyword">FROM</span> DUAL;        <span class="comment">-- → 12（字节数）</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- SQLite:</span></span><br><span class="line"><span class="keyword">SELECT</span> LENGTH(<span class="string">&#x27;你好世界&#x27;</span>);         <span class="comment">-- → 4（字符数）</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="4-4-大小写转换"><a href="#4-4-大小写转换" class="headerlink" title="4.4 大小写转换"></a>4.4 大小写转换</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 大写（五家通用）:</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="built_in">UPPER</span>(<span class="string">&#x27;hello&#x27;</span>);            <span class="comment">-- → HELLO</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 小写（五家通用）:</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="built_in">LOWER</span>(<span class="string">&#x27;HELLO&#x27;</span>);            <span class="comment">-- → hello</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 首字母大写（各不同）:</span></span><br><span class="line"><span class="comment">-- PostgreSQL: SELECT INITCAP(&#x27;hello world&#x27;);    -- → Hello World</span></span><br><span class="line"><span class="comment">-- SQL Server: 无内置，需自定义函数</span></span><br><span class="line"><span class="comment">-- Oracle:     SELECT INITCAP(&#x27;hello world&#x27;) FROM DUAL;</span></span><br><span class="line"><span class="comment">-- MySQL:      无内置</span></span><br><span class="line"><span class="comment">-- SQLite:     无内置</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="4-5-搜索与替换"><a href="#4-5-搜索与替换" class="headerlink" title="4.5 搜索与替换"></a>4.5 搜索与替换</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 子串位置</span></span><br><span class="line"><span class="comment">-- MySQL:    SELECT INSTR(&#x27;Hello World&#x27;, &#x27;World&#x27;);        -- → 7</span></span><br><span class="line"><span class="comment">--           SELECT LOCATE(&#x27;World&#x27;, &#x27;Hello World&#x27;);       -- → 7</span></span><br><span class="line"><span class="comment">-- PostgreSQL / Oracle / SQLite: SELECT INSTR(...) （Oracle） 或 POSITION(&#x27;World&#x27; IN &#x27;Hello World&#x27;)</span></span><br><span class="line"><span class="comment">-- SQL Server: SELECT CHARINDEX(&#x27;World&#x27;, &#x27;Hello World&#x27;);  -- → 7</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 替换</span></span><br><span class="line"><span class="comment">-- 五家通用:</span></span><br><span class="line"><span class="keyword">SELECT</span> REPLACE(<span class="string">&#x27;Hello World&#x27;</span>, <span class="string">&#x27;World&#x27;</span>, <span class="string">&#x27;SQL&#x27;</span>);  <span class="comment">-- → Hello SQL</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="五、类型转换"><a href="#五、类型转换" class="headerlink" title="五、类型转换"></a>五、类型转换</h2><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ========== MySQL ==========</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="built_in">CAST</span>(<span class="string">&#x27;123&#x27;</span> <span class="keyword">AS</span> <span class="type">INT</span>);</span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">CONVERT</span>(<span class="string">&#x27;123&#x27;</span>, <span class="type">INT</span>);</span><br><span class="line"><span class="keyword">SELECT</span> <span class="built_in">CAST</span>(<span class="string">&#x27;2024-01-01&#x27;</span> <span class="keyword">AS</span> <span class="type">DATE</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ========== PostgreSQL ==========</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="built_in">CAST</span>(<span class="string">&#x27;123&#x27;</span> <span class="keyword">AS</span> <span class="type">INTEGER</span>);</span><br><span class="line"><span class="keyword">SELECT</span> <span class="string">&#x27;123&#x27;</span>::<span class="type">INTEGER</span>;                      <span class="comment">-- :: 后置强转（PostgreSQL 特有）</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="built_in">CAST</span>(<span class="string">&#x27;2024-01-01&#x27;</span> <span class="keyword">AS</span> <span class="type">DATE</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ========== SQL Server ==========</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="built_in">CAST</span>(<span class="string">&#x27;123&#x27;</span> <span class="keyword">AS</span> <span class="type">INT</span>);</span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">CONVERT</span>(<span class="type">INT</span>, <span class="string">&#x27;123&#x27;</span>);                 <span class="comment">-- CONVERT 函数（特有）</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">CONVERT</span>(<span class="type">DATE</span>, <span class="string">&#x27;2024-01-01&#x27;</span>, <span class="number">120</span>);    <span class="comment">-- 带格式码转换</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- ========== Oracle ==========</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="built_in">CAST</span>(<span class="string">&#x27;123&#x27;</span> <span class="keyword">AS</span> NUMBER) <span class="keyword">FROM</span> DUAL;</span><br><span class="line"><span class="keyword">SELECT</span> TO_NUMBER(<span class="string">&#x27;123&#x27;</span>) <span class="keyword">FROM</span> DUAL;          <span class="comment">-- Oracle 常用 TO_* 系列</span></span><br><span class="line"><span class="keyword">SELECT</span> TO_DATE(<span class="string">&#x27;2024-01-01&#x27;</span>, <span class="string">&#x27;YYYY-MM-DD&#x27;</span>) <span class="keyword">FROM</span> DUAL;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ========== SQLite ==========</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="built_in">CAST</span>(<span class="string">&#x27;123&#x27;</span> <span class="keyword">AS</span> <span class="type">INTEGER</span>);</span><br><span class="line"><span class="comment">-- SQLite 类型系统宽松，很多情况下自动转换</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="六、判断与流程控制"><a href="#六、判断与流程控制" class="headerlink" title="六、判断与流程控制"></a>六、判断与流程控制</h2><h3 id="6-1-IF-CASE"><a href="#6-1-IF-CASE" class="headerlink" title="6.1 IF &#x2F; CASE"></a>6.1 IF &#x2F; CASE</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- CASE 表达式（五家通用）:</span></span><br><span class="line"><span class="keyword">SELECT</span> </span><br><span class="line">    name,</span><br><span class="line">    <span class="keyword">CASE</span> </span><br><span class="line">        <span class="keyword">WHEN</span> score <span class="operator">&gt;=</span> <span class="number">90</span> <span class="keyword">THEN</span> <span class="string">&#x27;A&#x27;</span></span><br><span class="line">        <span class="keyword">WHEN</span> score <span class="operator">&gt;=</span> <span class="number">80</span> <span class="keyword">THEN</span> <span class="string">&#x27;B&#x27;</span></span><br><span class="line">        <span class="keyword">WHEN</span> score <span class="operator">&gt;=</span> <span class="number">60</span> <span class="keyword">THEN</span> <span class="string">&#x27;C&#x27;</span></span><br><span class="line">        <span class="keyword">ELSE</span> <span class="string">&#x27;D&#x27;</span></span><br><span class="line">    <span class="keyword">END</span> <span class="keyword">AS</span> grade</span><br><span class="line"><span class="keyword">FROM</span> students;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ========== MySQL 专属: IF() 函数 ==========</span></span><br><span class="line"><span class="keyword">SELECT</span> IF(score <span class="operator">&gt;=</span> <span class="number">60</span>, <span class="string">&#x27;及格&#x27;</span>, <span class="string">&#x27;不及格&#x27;</span>) <span class="keyword">FROM</span> students;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ========== PostgreSQL 专属: 无 IF()，用 CASE ==========</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- ========== SQL Server 专属: IIF() 函数 ==========</span></span><br><span class="line"><span class="keyword">SELECT</span> IIF(score <span class="operator">&gt;=</span> <span class="number">60</span>, <span class="string">&#x27;及格&#x27;</span>, <span class="string">&#x27;不及格&#x27;</span>) <span class="keyword">FROM</span> students;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ========== Oracle 专属: DECODE() 函数 ==========</span></span><br><span class="line"><span class="keyword">SELECT</span> DECODE(status, <span class="number">1</span>, <span class="string">&#x27;激活&#x27;</span>, <span class="number">2</span>, <span class="string">&#x27;禁用&#x27;</span>, <span class="string">&#x27;未知&#x27;</span>) <span class="keyword">FROM</span> users;</span><br><span class="line"><span class="comment">-- (类似 switch-case，比 CASE 简洁)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- ========== SQLite 专属: IIF() ==========</span></span><br><span class="line"><span class="keyword">SELECT</span> IIF(score <span class="operator">&gt;=</span> <span class="number">60</span>, <span class="string">&#x27;及格&#x27;</span>, <span class="string">&#x27;不及格&#x27;</span>) <span class="keyword">FROM</span> students;</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-2-NULL-处理"><a href="#6-2-NULL-处理" class="headerlink" title="6.2 NULL 处理"></a>6.2 NULL 处理</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- COALESCE（返回第一个非 NULL 值，五家通用）:</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="built_in">COALESCE</span>(nickname, username, <span class="string">&#x27;匿名&#x27;</span>) <span class="keyword">FROM</span> users;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- NULLIF（相等返回 NULL，五家通用）:</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="built_in">NULLIF</span>(<span class="number">0</span>, <span class="number">0</span>);   <span class="comment">-- → NULL</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="built_in">NULLIF</span>(<span class="number">1</span>, <span class="number">0</span>);   <span class="comment">-- → 1</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- MySQL / SQLite 专属: IFNULL()</span></span><br><span class="line"><span class="keyword">SELECT</span> IFNULL(nickname, <span class="string">&#x27;匿名&#x27;</span>) <span class="keyword">FROM</span> users;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- PostgreSQL: 无 IFNULL，用 COALESCE</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- SQL Server 专属: ISNULL()</span></span><br><span class="line"><span class="keyword">SELECT</span> ISNULL(nickname, <span class="string">&#x27;匿名&#x27;</span>) <span class="keyword">FROM</span> users;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- Oracle 专属: NVL()</span></span><br><span class="line"><span class="keyword">SELECT</span> NVL(nickname, <span class="string">&#x27;匿名&#x27;</span>) <span class="keyword">FROM</span> users;</span><br><span class="line"><span class="comment">-- Oracle 还有 NVL2(): NVL2(expr, not_null_val, null_val)</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="七、MERGE-UPSERT"><a href="#七、MERGE-UPSERT" class="headerlink" title="七、MERGE&#x2F;UPSERT"></a>七、MERGE&#x2F;UPSERT</h2><blockquote>
+<p>“存在则更新，不存在则插入” —— 这是跨库差异最大的语法之一。</p>
+</blockquote>
+<h3 id="MySQL"><a href="#MySQL" class="headerlink" title="MySQL"></a>MySQL</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ON DUPLICATE KEY UPDATE（需要唯一键冲突）</span></span><br><span class="line"><span class="keyword">INSERT INTO</span> users (id, name, email)</span><br><span class="line"><span class="keyword">VALUES</span> (<span class="number">1</span>, <span class="string">&#x27;张三&#x27;</span>, <span class="string">&#x27;zhangsan@example.com&#x27;</span>)</span><br><span class="line"><span class="keyword">ON</span> DUPLICATE KEY <span class="keyword">UPDATE</span> name <span class="operator">=</span> <span class="keyword">VALUES</span>(name), email <span class="operator">=</span> <span class="keyword">VALUES</span>(email);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 或者 REPLACE（先删后插，慎用——会丢失未指定的列值）</span></span><br><span class="line">REPLACE <span class="keyword">INTO</span> users (id, name, email) <span class="keyword">VALUES</span> (<span class="number">1</span>, <span class="string">&#x27;张三&#x27;</span>, <span class="string">&#x27;zhangsan@example.com&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="PostgreSQL"><a href="#PostgreSQL" class="headerlink" title="PostgreSQL"></a>PostgreSQL</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ON CONFLICT DO UPDATE（推荐，PostgreSQL 9.5+）</span></span><br><span class="line"><span class="keyword">INSERT INTO</span> users (id, name, email)</span><br><span class="line"><span class="keyword">VALUES</span> (<span class="number">1</span>, <span class="string">&#x27;张三&#x27;</span>, <span class="string">&#x27;zhangsan@example.com&#x27;</span>)</span><br><span class="line"><span class="keyword">ON</span> CONFLICT (id) DO <span class="keyword">UPDATE</span></span><br><span class="line"><span class="keyword">SET</span> name <span class="operator">=</span> EXCLUDED.name, email <span class="operator">=</span> EXCLUDED.email;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ON CONFLICT DO NOTHING（存在则忽略）</span></span><br><span class="line"><span class="keyword">INSERT INTO</span> users (id, name, email)</span><br><span class="line"><span class="keyword">VALUES</span> (<span class="number">1</span>, <span class="string">&#x27;张三&#x27;</span>, <span class="string">&#x27;zhangsan@example.com&#x27;</span>)</span><br><span class="line"><span class="keyword">ON</span> CONFLICT (id) DO NOTHING;</span><br></pre></td></tr></table></figure>
+
+<h3 id="SQL-Server-1"><a href="#SQL-Server-1" class="headerlink" title="SQL Server"></a>SQL Server</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- MERGE 语句（SQL Server 2008+）</span></span><br><span class="line"><span class="keyword">MERGE</span> users <span class="keyword">AS</span> target</span><br><span class="line"><span class="keyword">USING</span> (<span class="keyword">VALUES</span> (<span class="number">1</span>, <span class="string">&#x27;张三&#x27;</span>, <span class="string">&#x27;zhangsan@example.com&#x27;</span>)) <span class="keyword">AS</span> source (id, name, email)</span><br><span class="line"><span class="keyword">ON</span> target.id <span class="operator">=</span> source.id</span><br><span class="line"><span class="keyword">WHEN</span> MATCHED <span class="keyword">THEN</span></span><br><span class="line">    <span class="keyword">UPDATE</span> <span class="keyword">SET</span> name <span class="operator">=</span> source.name, email <span class="operator">=</span> source.email</span><br><span class="line"><span class="keyword">WHEN</span> <span class="keyword">NOT</span> MATCHED <span class="keyword">THEN</span></span><br><span class="line">    <span class="keyword">INSERT</span> (id, name, email) <span class="keyword">VALUES</span> (source.id, source.name, source.email);</span><br></pre></td></tr></table></figure>
+
+<h3 id="Oracle-1"><a href="#Oracle-1" class="headerlink" title="Oracle"></a>Oracle</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- MERGE 语句（Oracle 9i+）</span></span><br><span class="line"><span class="keyword">MERGE</span> <span class="keyword">INTO</span> users t</span><br><span class="line"><span class="keyword">USING</span> (<span class="keyword">SELECT</span> <span class="number">1</span> <span class="keyword">AS</span> id, <span class="string">&#x27;张三&#x27;</span> <span class="keyword">AS</span> name, <span class="string">&#x27;zhangsan@example.com&#x27;</span> <span class="keyword">AS</span> email <span class="keyword">FROM</span> DUAL) s</span><br><span class="line"><span class="keyword">ON</span> (t.id <span class="operator">=</span> s.id)</span><br><span class="line"><span class="keyword">WHEN</span> MATCHED <span class="keyword">THEN</span></span><br><span class="line">    <span class="keyword">UPDATE</span> <span class="keyword">SET</span> t.name <span class="operator">=</span> s.name, t.email <span class="operator">=</span> s.email</span><br><span class="line"><span class="keyword">WHEN</span> <span class="keyword">NOT</span> MATCHED <span class="keyword">THEN</span></span><br><span class="line">    <span class="keyword">INSERT</span> (id, name, email) <span class="keyword">VALUES</span> (s.id, s.name, s.email);</span><br></pre></td></tr></table></figure>
+
+<h3 id="SQLite"><a href="#SQLite" class="headerlink" title="SQLite"></a>SQLite</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ON CONFLICT（SQLite 3.24+）</span></span><br><span class="line"><span class="keyword">INSERT INTO</span> users (id, name, email)</span><br><span class="line"><span class="keyword">VALUES</span> (<span class="number">1</span>, <span class="string">&#x27;张三&#x27;</span>, <span class="string">&#x27;zhangsan@example.com&#x27;</span>)</span><br><span class="line"><span class="keyword">ON</span> CONFLICT(id) DO <span class="keyword">UPDATE</span></span><br><span class="line"><span class="keyword">SET</span> name <span class="operator">=</span> EXCLUDED.name, email <span class="operator">=</span> EXCLUDED.email;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 旧版用 INSERT OR REPLACE（注意：会删除旧行再插入）</span></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">OR</span> REPLACE <span class="keyword">INTO</span> users (id, name, email) <span class="keyword">VALUES</span> (<span class="number">1</span>, <span class="string">&#x27;张三&#x27;</span>, <span class="string">&#x27;zhangsan@example.com&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="UPSERT-对照速查"><a href="#UPSERT-对照速查" class="headerlink" title="UPSERT 对照速查"></a>UPSERT 对照速查</h3><table>
+<thead>
+<tr>
+<th>数据库</th>
+<th>UPSERT 语法</th>
+<th>版本要求</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MySQL</td>
+<td><code>INSERT ... ON DUPLICATE KEY UPDATE</code></td>
+<td>4.1+</td>
+</tr>
+<tr>
+<td>PostgreSQL</td>
+<td><code>INSERT ... ON CONFLICT DO UPDATE</code></td>
+<td>9.5+</td>
+</tr>
+<tr>
+<td>SQL Server</td>
+<td><code>MERGE</code> 语句</td>
+<td>2008+</td>
+</tr>
+<tr>
+<td>Oracle</td>
+<td><code>MERGE</code> 语句</td>
+<td>9i+</td>
+</tr>
+<tr>
+<td>SQLite</td>
+<td><code>INSERT ... ON CONFLICT DO UPDATE</code></td>
+<td>3.24+</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="八、JSON-处理"><a href="#八、JSON-处理" class="headerlink" title="八、JSON 处理"></a>八、JSON 处理</h2><h3 id="8-1-JSON-提取值"><a href="#8-1-JSON-提取值" class="headerlink" title="8.1 JSON 提取值"></a>8.1 JSON 提取值</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ========== MySQL (5.7+) ==========</span></span><br><span class="line"><span class="comment">-- 路径语法: $.key</span></span><br><span class="line"><span class="keyword">SELECT</span> JSON_EXTRACT(<span class="string">&#x27;&#123;&quot;name&quot;:&quot;张三&quot;,&quot;age&quot;:25&#125;&#x27;</span>, <span class="string">&#x27;$.name&#x27;</span>);</span><br><span class="line"><span class="comment">-- 或 -&gt; 简写:</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="string">&#x27;&#123;&quot;name&quot;:&quot;张三&quot;,&quot;age&quot;:25&#125;&#x27;</span><span class="operator">-</span><span class="operator">&gt;</span><span class="string">&#x27;$.name&#x27;</span>;</span><br><span class="line"><span class="comment">-- 去除引号:</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="string">&#x27;&#123;&quot;name&quot;:&quot;张三&quot;,&quot;age&quot;:25&#125;&#x27;</span><span class="operator">-</span><span class="operator">&gt;&gt;</span><span class="string">&#x27;$.name&#x27;</span>;  <span class="comment">-- → 张三（无引号）</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- ========== PostgreSQL (9.3+) ==========</span></span><br><span class="line"><span class="comment">-- 路径语法: -&gt; 和 -&gt;&gt;</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="string">&#x27;&#123;&quot;name&quot;:&quot;张三&quot;,&quot;age&quot;:25&#125;&#x27;</span>::json<span class="operator">-</span><span class="operator">&gt;</span><span class="string">&#x27;name&#x27;</span>;     <span class="comment">-- → &quot;张三&quot;（JSONB 更高效）</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="string">&#x27;&#123;&quot;name&quot;:&quot;张三&quot;,&quot;age&quot;:25&#125;&#x27;</span>::jsonb<span class="operator">-</span><span class="operator">&gt;&gt;</span><span class="string">&#x27;name&#x27;</span>;   <span class="comment">-- → 张三</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- ========== SQL Server (2016+) ==========</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="built_in">JSON_VALUE</span>(<span class="string">&#x27;&#123;&quot;name&quot;:&quot;张三&quot;,&quot;age&quot;:25&#125;&#x27;</span>, <span class="string">&#x27;$.name&#x27;</span>);  <span class="comment">-- → 张三</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="built_in">JSON_QUERY</span>(<span class="string">&#x27;&#123;&quot;items&quot;:[1,2,3]&#125;&#x27;</span>, <span class="string">&#x27;$.items&#x27;</span>);       <span class="comment">-- → [1,2,3]</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- ========== Oracle (12c+) ==========</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="built_in">JSON_VALUE</span>(<span class="string">&#x27;&#123;&quot;name&quot;:&quot;张三&quot;,&quot;age&quot;:25&#125;&#x27;</span>, <span class="string">&#x27;$.name&#x27;</span>) <span class="keyword">FROM</span> DUAL;</span><br><span class="line"><span class="keyword">SELECT</span> <span class="built_in">JSON_QUERY</span>(<span class="string">&#x27;&#123;&quot;items&quot;:[1,2,3]&#125;&#x27;</span>, <span class="string">&#x27;$.items&#x27;</span>) <span class="keyword">FROM</span> DUAL;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ========== SQLite (3.9+) ==========</span></span><br><span class="line"><span class="keyword">SELECT</span> json_extract(<span class="string">&#x27;&#123;&quot;name&quot;:&quot;张三&quot;,&quot;age&quot;:25&#125;&#x27;</span>, <span class="string">&#x27;$.name&#x27;</span>);</span><br><span class="line"><span class="comment">-- 或 -&gt; 简写:</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="string">&#x27;&#123;&quot;name&quot;:&quot;张三&quot;,&quot;age&quot;:25&#125;&#x27;</span><span class="operator">-</span><span class="operator">&gt;</span><span class="string">&#x27;$.name&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="8-2-JSON-数组展开"><a href="#8-2-JSON-数组展开" class="headerlink" title="8.2 JSON 数组展开"></a>8.2 JSON 数组展开</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- MySQL 8.0+: JSON_TABLE()</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> <span class="built_in">JSON_TABLE</span>(</span><br><span class="line">    <span class="string">&#x27;[&#123;&quot;name&quot;:&quot;张三&quot;&#125;,&#123;&quot;name&quot;:&quot;李四&quot;&#125;]&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;$[*]&#x27;</span> COLUMNS (name <span class="type">VARCHAR</span>(<span class="number">50</span>) PATH <span class="string">&#x27;$.name&#x27;</span>)</span><br><span class="line">) <span class="keyword">AS</span> jt;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- PostgreSQL: jsonb_array_elements()</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">value</span><span class="operator">-</span><span class="operator">&gt;&gt;</span><span class="string">&#x27;name&#x27;</span> <span class="keyword">AS</span> name</span><br><span class="line"><span class="keyword">FROM</span> jsonb_array_elements(<span class="string">&#x27;[&#123;&quot;name&quot;:&quot;张三&quot;&#125;,&#123;&quot;name&quot;:&quot;李四&quot;&#125;]&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- SQL Server: OPENJSON()</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> OPENJSON(<span class="string">&#x27;[&#123;&quot;name&quot;:&quot;张三&quot;&#125;,&#123;&quot;name&quot;:&quot;李四&quot;&#125;]&#x27;</span>)</span><br><span class="line"><span class="keyword">WITH</span> (name NVARCHAR(<span class="number">50</span>) <span class="string">&#x27;$.name&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- Oracle: JSON_TABLE()</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> <span class="built_in">JSON_TABLE</span>(</span><br><span class="line">    <span class="string">&#x27;[&#123;&quot;name&quot;:&quot;张三&quot;&#125;,&#123;&quot;name&quot;:&quot;李四&quot;&#125;]&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;$[*]&#x27;</span> COLUMNS (name VARCHAR2(<span class="number">50</span>) PATH <span class="string">&#x27;$.name&#x27;</span>)</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- SQLite: json_each()</span></span><br><span class="line"><span class="keyword">SELECT</span> json_extract(<span class="keyword">value</span>, <span class="string">&#x27;$.name&#x27;</span>)</span><br><span class="line"><span class="keyword">FROM</span> json_each(<span class="string">&#x27;[&#123;&quot;name&quot;:&quot;张三&quot;&#125;,&#123;&quot;name&quot;:&quot;李四&quot;&#125;]&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="九、DDL-常见差异"><a href="#九、DDL-常见差异" class="headerlink" title="九、DDL 常见差异"></a>九、DDL 常见差异</h2><h3 id="9-1-修改列"><a href="#9-1-修改列" class="headerlink" title="9.1 修改列"></a>9.1 修改列</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- MySQL:</span></span><br><span class="line"><span class="keyword">ALTER TABLE</span> users MODIFY <span class="keyword">COLUMN</span> name <span class="type">VARCHAR</span>(<span class="number">100</span>) <span class="keyword">NOT NULL</span>;</span><br><span class="line"><span class="keyword">ALTER TABLE</span> users CHANGE <span class="keyword">COLUMN</span> old_name new_name <span class="type">VARCHAR</span>(<span class="number">100</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- PostgreSQL:</span></span><br><span class="line"><span class="keyword">ALTER TABLE</span> users <span class="keyword">ALTER</span> <span class="keyword">COLUMN</span> name TYPE <span class="type">VARCHAR</span>(<span class="number">100</span>);</span><br><span class="line"><span class="keyword">ALTER TABLE</span> users <span class="keyword">ALTER</span> <span class="keyword">COLUMN</span> name <span class="keyword">SET</span> <span class="keyword">NOT NULL</span>;</span><br><span class="line"><span class="keyword">ALTER TABLE</span> users RENAME <span class="keyword">COLUMN</span> old_name <span class="keyword">TO</span> new_name;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- SQL Server:</span></span><br><span class="line"><span class="keyword">ALTER TABLE</span> users <span class="keyword">ALTER</span> <span class="keyword">COLUMN</span> name <span class="type">VARCHAR</span>(<span class="number">100</span>) <span class="keyword">NOT NULL</span>;</span><br><span class="line"><span class="keyword">EXEC</span> sp_rename <span class="string">&#x27;users.old_name&#x27;</span>, <span class="string">&#x27;new_name&#x27;</span>, <span class="string">&#x27;COLUMN&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- Oracle:</span></span><br><span class="line"><span class="keyword">ALTER TABLE</span> users MODIFY name VARCHAR2(<span class="number">100</span>) <span class="keyword">NOT NULL</span>;</span><br><span class="line"><span class="keyword">ALTER TABLE</span> users RENAME <span class="keyword">COLUMN</span> old_name <span class="keyword">TO</span> new_name;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- SQLite:</span></span><br><span class="line"><span class="comment">-- SQLite 不支持直接修改列，需要重建表（3.35+ 支持 ALTER TABLE ... RENAME COLUMN）</span></span><br><span class="line"><span class="keyword">ALTER TABLE</span> users RENAME <span class="keyword">COLUMN</span> old_name <span class="keyword">TO</span> new_name;</span><br></pre></td></tr></table></figure>
+
+<h3 id="9-2-添加-删除列"><a href="#9-2-添加-删除列" class="headerlink" title="9.2 添加&#x2F;删除列"></a>9.2 添加&#x2F;删除列</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 添加列（五家基本相同）:</span></span><br><span class="line"><span class="keyword">ALTER TABLE</span> users <span class="keyword">ADD</span> <span class="keyword">COLUMN</span> age <span class="type">INT</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 删除列:</span></span><br><span class="line"><span class="comment">-- MySQL:      ALTER TABLE users DROP COLUMN age;</span></span><br><span class="line"><span class="comment">-- PostgreSQL: ALTER TABLE users DROP COLUMN age;</span></span><br><span class="line"><span class="comment">-- SQL Server: ALTER TABLE users DROP COLUMN age;</span></span><br><span class="line"><span class="comment">-- Oracle:     ALTER TABLE users DROP COLUMN age;</span></span><br><span class="line"><span class="comment">-- SQLite:     不支持 DROP COLUMN（3.35+ 支持）</span></span><br><span class="line"><span class="keyword">ALTER TABLE</span> users <span class="keyword">DROP</span> <span class="keyword">COLUMN</span> age;</span><br></pre></td></tr></table></figure>
+
+<h3 id="9-3-截断表"><a href="#9-3-截断表" class="headerlink" title="9.3 截断表"></a>9.3 截断表</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- MySQL / PostgreSQL / SQL Server / Oracle / SQLite:</span></span><br><span class="line"><span class="keyword">TRUNCATE</span> <span class="keyword">TABLE</span> users;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 差异点：</span></span><br><span class="line"><span class="comment">-- MySQL:      释放存储空间，重置 AUTO_INCREMENT</span></span><br><span class="line"><span class="comment">-- PostgreSQL: 默认不重置序列，需加 RESTART IDENTITY</span></span><br><span class="line"><span class="keyword">TRUNCATE</span> <span class="keyword">TABLE</span> users RESTART <span class="keyword">IDENTITY</span>;</span><br><span class="line"><span class="comment">-- Oracle:     不可回滚，不触发 DELETE 触发器</span></span><br><span class="line"><span class="comment">-- SQL Server: 需要 ALTER 权限</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="9-4-创建索引"><a href="#9-4-创建索引" class="headerlink" title="9.4 创建索引"></a>9.4 创建索引</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 普通索引（五家通用）:</span></span><br><span class="line"><span class="keyword">CREATE</span> INDEX idx_name <span class="keyword">ON</span> users(name);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 唯一索引（五家通用）:</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">UNIQUE</span> INDEX idx_email <span class="keyword">ON</span> users(email);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 部分/条件索引（MySQL 不支持，PostgreSQL / SQL Server / Oracle / SQLite 支持）:</span></span><br><span class="line"><span class="keyword">CREATE</span> INDEX idx_active_users <span class="keyword">ON</span> users(email) <span class="keyword">WHERE</span> status <span class="operator">=</span> <span class="number">1</span>;  <span class="comment">-- PostgreSQL / SQLite</span></span><br><span class="line"><span class="keyword">CREATE</span> INDEX idx_active_users <span class="keyword">ON</span> users(email) <span class="keyword">WHERE</span> status <span class="operator">=</span> <span class="number">1</span>;  <span class="comment">-- SQL Server: 用 Filtered Index</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="9-5-注释"><a href="#9-5-注释" class="headerlink" title="9.5 注释"></a>9.5 注释</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- MySQL: COMMENT 关键字</span></span><br><span class="line"><span class="keyword">CREATE TABLE</span> t1 (</span><br><span class="line">    id   <span class="type">INT</span> COMMENT <span class="string">&#x27;主键ID&#x27;</span>,</span><br><span class="line">    name <span class="type">VARCHAR</span>(<span class="number">50</span>) COMMENT <span class="string">&#x27;用户名&#x27;</span></span><br><span class="line">) COMMENT<span class="operator">=</span><span class="string">&#x27;用户表&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- PostgreSQL: COMMENT ON 语法</span></span><br><span class="line">COMMENT <span class="keyword">ON</span> <span class="keyword">TABLE</span> users <span class="keyword">IS</span> <span class="string">&#x27;用户表&#x27;</span>;</span><br><span class="line">COMMENT <span class="keyword">ON</span> <span class="keyword">COLUMN</span> users.name <span class="keyword">IS</span> <span class="string">&#x27;用户名&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- SQL Server: 扩展属性</span></span><br><span class="line"><span class="keyword">EXEC</span> sp_addextendedproperty <span class="string">&#x27;MS_Description&#x27;</span>, <span class="string">&#x27;用户表&#x27;</span>, <span class="string">&#x27;SCHEMA&#x27;</span>, <span class="string">&#x27;dbo&#x27;</span>, <span class="string">&#x27;TABLE&#x27;</span>, <span class="string">&#x27;users&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- Oracle: COMMENT ON 语法（与 PostgreSQL 类似）</span></span><br><span class="line">COMMENT <span class="keyword">ON</span> <span class="keyword">TABLE</span> users <span class="keyword">IS</span> <span class="string">&#x27;用户表&#x27;</span>;</span><br><span class="line">COMMENT <span class="keyword">ON</span> <span class="keyword">COLUMN</span> users.name <span class="keyword">IS</span> <span class="string">&#x27;用户名&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- SQLite: 不支持注释</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="十、查询计划"><a href="#十、查询计划" class="headerlink" title="十、查询计划"></a>十、查询计划</h2><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- MySQL:</span></span><br><span class="line">EXPLAIN <span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> name <span class="operator">=</span> <span class="string">&#x27;张三&#x27;</span>;</span><br><span class="line">EXPLAIN ANALYZE <span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> name <span class="operator">=</span> <span class="string">&#x27;张三&#x27;</span>;   <span class="comment">-- 8.0.18+，实际执行并统计</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- PostgreSQL:</span></span><br><span class="line">EXPLAIN <span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> name <span class="operator">=</span> <span class="string">&#x27;张三&#x27;</span>;</span><br><span class="line">EXPLAIN ANALYZE <span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> name <span class="operator">=</span> <span class="string">&#x27;张三&#x27;</span>;   <span class="comment">-- 实际执行并统计</span></span><br><span class="line"><span class="comment">-- PostgreSQL 的输出信息最详细</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- SQL Server:</span></span><br><span class="line"><span class="keyword">SET</span> SHOWPLAN_XML <span class="keyword">ON</span>;   <span class="comment">-- 图形化执行计划（SSMS 中直接看）</span></span><br><span class="line"><span class="comment">-- 或</span></span><br><span class="line"><span class="keyword">SET</span> STATISTICS IO <span class="keyword">ON</span>;</span><br><span class="line"><span class="keyword">SET</span> STATISTICS <span class="type">TIME</span> <span class="keyword">ON</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- Oracle:</span></span><br><span class="line">EXPLAIN PLAN <span class="keyword">FOR</span> <span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> name <span class="operator">=</span> <span class="string">&#x27;张三&#x27;</span>;</span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> <span class="keyword">TABLE</span>(DBMS_XPLAN.DISPLAY);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- SQLite:</span></span><br><span class="line">EXPLAIN QUERY PLAN <span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> name <span class="operator">=</span> <span class="string">&#x27;张三&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="十一、数据类型映射"><a href="#十一、数据类型映射" class="headerlink" title="十一、数据类型映射"></a>十一、数据类型映射</h2><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>MySQL</th>
+<th>PostgreSQL</th>
+<th>SQL Server</th>
+<th>Oracle</th>
+<th>SQLite</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>自增整数</td>
+<td><code>INT AUTO_INCREMENT</code></td>
+<td><code>SERIAL</code> &#x2F; <code>INT GENERATED AS IDENTITY</code></td>
+<td><code>INT IDENTITY</code></td>
+<td><code>NUMBER GENERATED AS IDENTITY</code></td>
+<td><code>INTEGER PRIMARY KEY</code></td>
+</tr>
+<tr>
+<td>变长字符</td>
+<td><code>VARCHAR(N)</code></td>
+<td><code>VARCHAR(N)</code></td>
+<td><code>NVARCHAR(N)</code> (Unicode)</td>
+<td><code>VARCHAR2(N)</code></td>
+<td><code>TEXT</code></td>
+</tr>
+<tr>
+<td>定长字符</td>
+<td><code>CHAR(N)</code></td>
+<td><code>CHAR(N)</code></td>
+<td><code>NCHAR(N)</code></td>
+<td><code>CHAR(N)</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>长文本</td>
+<td><code>TEXT</code> &#x2F; <code>MEDIUMTEXT</code> &#x2F; <code>LONGTEXT</code></td>
+<td><code>TEXT</code></td>
+<td><code>NVARCHAR(MAX)</code></td>
+<td><code>CLOB</code></td>
+<td><code>TEXT</code></td>
+</tr>
+<tr>
+<td>整数</td>
+<td><code>INT</code></td>
+<td><code>INTEGER</code></td>
+<td><code>INT</code></td>
+<td><code>NUMBER</code></td>
+<td><code>INTEGER</code></td>
+</tr>
+<tr>
+<td>小数</td>
+<td><code>DECIMAL(P,S)</code></td>
+<td><code>DECIMAL(P,S)</code></td>
+<td><code>DECIMAL(P,S)</code></td>
+<td><code>NUMBER(P,S)</code></td>
+<td><code>REAL</code> &#x2F; <code>NUMERIC</code></td>
+</tr>
+<tr>
+<td>布尔值</td>
+<td><code>TINYINT(1)</code> &#x2F; <code>BOOLEAN</code> (8.0+)</td>
+<td><code>BOOLEAN</code></td>
+<td><code>BIT</code></td>
+<td><code>NUMBER(1)</code></td>
+<td><code>INTEGER</code> (0&#x2F;1)</td>
+</tr>
+<tr>
+<td>日期时间</td>
+<td><code>DATETIME</code></td>
+<td><code>TIMESTAMP</code></td>
+<td><code>DATETIME2</code></td>
+<td><code>DATE</code> &#x2F; <code>TIMESTAMP</code></td>
+<td><code>TEXT</code> (ISO 8601)</td>
+</tr>
+<tr>
+<td>二进制</td>
+<td><code>BLOB</code></td>
+<td><code>BYTEA</code></td>
+<td><code>VARBINARY(MAX)</code></td>
+<td><code>BLOB</code></td>
+<td><code>BLOB</code></td>
+</tr>
+<tr>
+<td>JSON</td>
+<td><code>JSON</code></td>
+<td><code>JSON</code> &#x2F; <code>JSONB</code></td>
+<td><code>NVARCHAR(MAX)</code> (ISJSON 约束)</td>
+<td><code>JSON</code> &#x2F; <code>VARCHAR2</code></td>
+<td><code>TEXT</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="十二、字符串引号与转义"><a href="#十二、字符串引号与转义" class="headerlink" title="十二、字符串引号与转义"></a>十二、字符串引号与转义</h2><h3 id="12-1-引号规则"><a href="#12-1-引号规则" class="headerlink" title="12.1 引号规则"></a>12.1 引号规则</h3><table>
+<thead>
+<tr>
+<th>数据库</th>
+<th>字符串</th>
+<th>标识符引用</th>
+<th>别名引用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MySQL</td>
+<td><code>&#39;单引号&#39;</code> 或 <code>&quot;双引号&quot;</code>（ANSI 模式）</td>
+<td><code>`反引号`</code></td>
+<td><code>`反引号`</code> 或不加</td>
+</tr>
+<tr>
+<td>PostgreSQL</td>
+<td><code>&#39;单引号&#39;</code></td>
+<td><code>&quot;双引号&quot;</code></td>
+<td><code>&quot;双引号&quot;</code> 或不加</td>
+</tr>
+<tr>
+<td>SQL Server</td>
+<td><code>&#39;单引号&#39;</code></td>
+<td><code>[方括号]</code> 或 <code>&quot;双引号&quot;</code></td>
+<td><code>[方括号]</code> 或 <code>&quot;双引号&quot;</code></td>
+</tr>
+<tr>
+<td>Oracle</td>
+<td><code>&#39;单引号&#39;</code></td>
+<td><code>&quot;双引号&quot;</code></td>
+<td><code>&quot;双引号&quot;</code> 或不加</td>
+</tr>
+<tr>
+<td>SQLite</td>
+<td><code>&#39;单引号&#39;</code></td>
+<td><code>&quot;双引号&quot;</code> 或 <code>`反引号`</code> 或 <code>[方括号]</code></td>
+<td>同上</td>
+</tr>
+</tbody></table>
+<h3 id="12-2-转义"><a href="#12-2-转义" class="headerlink" title="12.2 转义"></a>12.2 转义</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- MySQL:</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="string">&#x27;It&#x27;&#x27;s fine&#x27;</span>;                        <span class="comment">-- 两个单引号转义</span></span><br><span class="line"><span class="keyword">SELECT</span> &quot;He said \&quot;hello\&quot;&quot;;                 <span class="comment">-- 反斜杠</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="string">&#x27;It\&#x27;</span>s fine<span class="string">&#x27;;                        -- 也支持反斜杠（非 SQL 标准）</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">-- PostgreSQL:</span></span><br><span class="line"><span class="string">SELECT &#x27;</span>It<span class="string">&#x27;&#x27;</span>s fine<span class="string">&#x27;;                        -- 两个单引号（标准做法）</span></span><br><span class="line"><span class="string">SELECT $$It&#x27;</span>s &quot;fine&quot;$$;                     <span class="comment">-- Dollar-sign quoting（不用转义）</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- SQL Server:</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="string">&#x27;It&#x27;&#x27;s fine&#x27;</span>;                        <span class="comment">-- 两个单引号</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- Oracle:</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="string">&#x27;It&#x27;&#x27;s fine&#x27;</span> <span class="keyword">FROM</span> DUAL;              <span class="comment">-- 两个单引号</span></span><br><span class="line"><span class="keyword">SELECT</span> q<span class="string">&#x27;[It&#x27;</span>s &quot;fine&quot;]<span class="string">&#x27; FROM DUAL;          -- Q 引用（Oracle 10g+）</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">-- SQLite:</span></span><br><span class="line"><span class="string">SELECT &#x27;</span>It<span class="string">&#x27;&#x27;</span>s fine<span class="string">&#x27;;                        -- 两个单引号</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="十三、正则表达式"><a href="#十三、正则表达式" class="headerlink" title="十三、正则表达式"></a>十三、正则表达式</h2><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- MySQL (REGEXP):</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> email REGEXP <span class="string">&#x27;^[a-z]+@[a-z]+\\.com$&#x27;</span>;</span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> name REGEXP <span class="string">&#x27;张(三|四)&#x27;</span>;       <span class="comment">-- 正则匹配</span></span><br><span class="line"><span class="keyword">SELECT</span> REGEXP_REPLACE(<span class="string">&#x27;abc123&#x27;</span>, <span class="string">&#x27;[0-9]+&#x27;</span>, <span class="string">&#x27;&#x27;</span>);           <span class="comment">-- 替换（MySQL 8.0+）</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- PostgreSQL (~ 运算符):</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> email <span class="operator">~</span> <span class="string">&#x27;^[a-z]+@[a-z]+\.com$&#x27;</span>;</span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> name <span class="operator">~</span> <span class="string">&#x27;张(三|四)&#x27;</span>;</span><br><span class="line"><span class="keyword">SELECT</span> REGEXP_REPLACE(<span class="string">&#x27;abc123&#x27;</span>, <span class="string">&#x27;[0-9]+&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="string">&#x27;g&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- SQL Server: 无原生正则，用 LIKE 或 CLR 扩展</span></span><br><span class="line"><span class="comment">-- LIKE 支持有限通配符: % _ [a-z] [^a-z]</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> name <span class="keyword">LIKE</span> <span class="string">&#x27;[张李]%&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- Oracle (REGEXP_LIKE):</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> REGEXP_LIKE(email, <span class="string">&#x27;^[a-z]+@[a-z]+\.com$&#x27;</span>);</span><br><span class="line"><span class="keyword">SELECT</span> REGEXP_REPLACE(<span class="string">&#x27;abc123&#x27;</span>, <span class="string">&#x27;[0-9]+&#x27;</span>, <span class="string">&#x27;&#x27;</span>) <span class="keyword">FROM</span> DUAL;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- SQLite (REGEXP 默认未实现，需自定义函数):</span></span><br><span class="line"><span class="comment">-- 需在应用层注册 regexp()</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> name REGEXP <span class="string">&#x27;张(三|四)&#x27;</span>;  <span class="comment">-- 需要先注册</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="十四、多表-JOIN-特有语法"><a href="#十四、多表-JOIN-特有语法" class="headerlink" title="十四、多表 JOIN 特有语法"></a>十四、多表 JOIN 特有语法</h2><h3 id="14-1-MySQL-独有：STRAIGHT-JOIN"><a href="#14-1-MySQL-独有：STRAIGHT-JOIN" class="headerlink" title="14.1 MySQL 独有：STRAIGHT_JOIN"></a>14.1 MySQL 独有：STRAIGHT_JOIN</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 强制按指定顺序 JOIN（跳过优化器的 JOIN 顺序优化）</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> small_table</span><br><span class="line">STRAIGHT_JOIN large_table <span class="keyword">ON</span> small_table.id <span class="operator">=</span> large_table.small_id;</span><br></pre></td></tr></table></figure>
+
+<h3 id="14-2-SQL-Server-独有：APPLY"><a href="#14-2-SQL-Server-独有：APPLY" class="headerlink" title="14.2 SQL Server 独有：APPLY"></a>14.2 SQL Server 独有：APPLY</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- CROSS APPLY：类似 INNER JOIN 子查询，但可以引用外部列</span></span><br><span class="line"><span class="keyword">SELECT</span> u.name, t.order_count</span><br><span class="line"><span class="keyword">FROM</span> users u</span><br><span class="line"><span class="keyword">CROSS</span> APPLY (</span><br><span class="line">    <span class="keyword">SELECT</span> <span class="built_in">COUNT</span>(<span class="operator">*</span>) <span class="keyword">AS</span> order_count</span><br><span class="line">    <span class="keyword">FROM</span> orders o <span class="keyword">WHERE</span> o.user_id <span class="operator">=</span> u.id</span><br><span class="line">) t;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- OUTER APPLY：类似 LEFT JOIN 子查询</span></span><br><span class="line"><span class="keyword">SELECT</span> u.name, t.order_count</span><br><span class="line"><span class="keyword">FROM</span> users u</span><br><span class="line"><span class="keyword">OUTER</span> APPLY (</span><br><span class="line">    <span class="keyword">SELECT</span> <span class="built_in">COUNT</span>(<span class="operator">*</span>) <span class="keyword">AS</span> order_count</span><br><span class="line">    <span class="keyword">FROM</span> orders o <span class="keyword">WHERE</span> o.user_id <span class="operator">=</span> u.id</span><br><span class="line">) t;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>PostgreSQL 用 <code>JOIN LATERAL</code> 实现相同功能，MySQL 8.0+ 也支持 <code>LATERAL</code>。</p>
+</blockquote>
+<h3 id="14-3-Oracle-独有：-外连接"><a href="#14-3-Oracle-独有：-外连接" class="headerlink" title="14.3 Oracle 独有：(+) 外连接"></a>14.3 Oracle 独有：(+) 外连接</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- Oracle 传统外连接写法（不推荐，但遗留代码中常见）</span></span><br><span class="line"><span class="keyword">SELECT</span> u.name, o.order_id</span><br><span class="line"><span class="keyword">FROM</span> users u, orders o</span><br><span class="line"><span class="keyword">WHERE</span> u.id <span class="operator">=</span> o.user_id(<span class="operator">+</span>);  <span class="comment">-- (+) = 右表可为空（LEFT JOIN 效果）</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="14-4-NATURAL-JOIN-语义差异"><a href="#14-4-NATURAL-JOIN-语义差异" class="headerlink" title="14.4 NATURAL JOIN 语义差异"></a>14.4 NATURAL JOIN 语义差异</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- MySQL / PostgreSQL / SQLite：基于同名列自动关联</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">NATURAL</span> <span class="keyword">JOIN</span> orders;</span><br><span class="line"><span class="comment">-- 自动找 users 和 orders 中同名的列做等值 JOIN</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 注意：SQL Server 不直接支持 NATURAL JOIN</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="十五、窗口函数差异"><a href="#十五、窗口函数差异" class="headerlink" title="十五、窗口函数差异"></a>十五、窗口函数差异</h2><p>窗口函数（<code>OVER</code> 子句）在五大数据库中基本统一，但仍有以下差异：</p>
+<table>
+<thead>
+<tr>
+<th>功能</th>
+<th>MySQL</th>
+<th>PostgreSQL</th>
+<th>SQL Server</th>
+<th>Oracle</th>
+<th>SQLite</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>窗口函数</td>
+<td>8.0+</td>
+<td>✅</td>
+<td>2005+</td>
+<td>✅</td>
+<td>3.25+</td>
+</tr>
+<tr>
+<td>ROW_NUMBER</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>RANK &#x2F; DENSE_RANK</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>LAG &#x2F; LEAD</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>SUM&#x2F;AVG OVER</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GROUPS 窗口</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>RANGE BETWEEN</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>EXCLUDE TIES</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>NTH_VALUE</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>命名窗口</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+</tbody></table>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 命名窗口（大多数数据库支持）:</span></span><br><span class="line"><span class="keyword">SELECT</span> </span><br><span class="line">    name,</span><br><span class="line">    salary,</span><br><span class="line">    dept_id,</span><br><span class="line">    <span class="built_in">ROW_NUMBER</span>() <span class="keyword">OVER</span> w <span class="keyword">AS</span> rn,</span><br><span class="line">    <span class="built_in">SUM</span>(salary) <span class="keyword">OVER</span> w <span class="keyword">AS</span> running_total</span><br><span class="line"><span class="keyword">FROM</span> employees</span><br><span class="line"><span class="keyword">WINDOW</span> w <span class="keyword">AS</span> (<span class="keyword">PARTITION</span> <span class="keyword">BY</span> dept_id <span class="keyword">ORDER</span> <span class="keyword">BY</span> salary);</span><br><span class="line"><span class="comment">-- 注意：SQL Server 不支持 WINDOW 子句，需要在每个 OVER 中重复定义</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="十六、存储过程与函数"><a href="#十六、存储过程与函数" class="headerlink" title="十六、存储过程与函数"></a>十六、存储过程与函数</h2><h3 id="16-1-简单存储过程对比"><a href="#16-1-简单存储过程对比" class="headerlink" title="16.1 简单存储过程对比"></a>16.1 简单存储过程对比</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ========== MySQL ==========</span></span><br><span class="line">DELIMITER $$</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">PROCEDURE</span> get_users_by_status(<span class="keyword">IN</span> p_status <span class="type">INT</span>)</span><br><span class="line"><span class="keyword">BEGIN</span></span><br><span class="line">    <span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> status <span class="operator">=</span> p_status;</span><br><span class="line"><span class="keyword">END</span>$$</span><br><span class="line">DELIMITER ;</span><br><span class="line"><span class="keyword">CALL</span> get_users_by_status(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ========== PostgreSQL ==========</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">OR</span> REPLACE <span class="keyword">FUNCTION</span> get_users_by_status(p_status <span class="type">INT</span>)</span><br><span class="line"><span class="keyword">RETURNS</span> <span class="keyword">TABLE</span>(id <span class="type">INT</span>, name <span class="type">VARCHAR</span>, email <span class="type">VARCHAR</span>) <span class="keyword">AS</span> $$</span><br><span class="line"><span class="keyword">BEGIN</span></span><br><span class="line">    <span class="keyword">RETURN</span> QUERY <span class="keyword">SELECT</span> u.id, u.name, u.email <span class="keyword">FROM</span> users u <span class="keyword">WHERE</span> u.status <span class="operator">=</span> p_status;</span><br><span class="line"><span class="keyword">END</span>;</span><br><span class="line">$$ <span class="keyword">LANGUAGE</span> plpgsql;</span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> get_users_by_status(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ========== SQL Server ==========</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">PROCEDURE</span> get_users_by_status <span class="variable">@p_status</span> <span class="type">INT</span></span><br><span class="line"><span class="keyword">AS</span></span><br><span class="line"><span class="keyword">BEGIN</span></span><br><span class="line">    <span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> status <span class="operator">=</span> <span class="variable">@p_status</span>;</span><br><span class="line"><span class="keyword">END</span>;</span><br><span class="line"><span class="keyword">EXEC</span> get_users_by_status <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ========== Oracle ==========</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">OR</span> REPLACE <span class="keyword">PROCEDURE</span> get_users_by_status(p_status <span class="keyword">IN</span> NUMBER) <span class="keyword">IS</span></span><br><span class="line"><span class="keyword">BEGIN</span></span><br><span class="line">    <span class="keyword">FOR</span> rec <span class="keyword">IN</span> (<span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> status <span class="operator">=</span> p_status) LOOP</span><br><span class="line">        DBMS_OUTPUT.PUT_LINE(rec.name);</span><br><span class="line">    <span class="keyword">END</span> LOOP;</span><br><span class="line"><span class="keyword">END</span>;</span><br><span class="line"><span class="keyword">EXEC</span> get_users_by_status(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ========== SQLite ==========</span></span><br><span class="line"><span class="comment">-- SQLite 不支持存储过程（嵌入式数据库特性）</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="16-2-语言选择"><a href="#16-2-语言选择" class="headerlink" title="16.2 语言选择"></a>16.2 语言选择</h3><table>
+<thead>
+<tr>
+<th>数据库</th>
+<th>过程语言</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MySQL</td>
+<td>SQL&#x2F;PSM（默认），也支持 JavaScript（8.0+）</td>
+</tr>
+<tr>
+<td>PostgreSQL</td>
+<td>PL&#x2F;pgSQL（默认）、PL&#x2F;Python、PL&#x2F;Perl、PL&#x2F;V8(JavaScript)、PL&#x2F;Java、PL&#x2F;R 等</td>
+</tr>
+<tr>
+<td>SQL Server</td>
+<td>T-SQL（默认），也支持 CLR 语言（C#、VB.NET）</td>
+</tr>
+<tr>
+<td>Oracle</td>
+<td>PL&#x2F;SQL（默认），也支持 Java</td>
+</tr>
+<tr>
+<td>SQLite</td>
+<td>不支持</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="十七、临时表"><a href="#十七、临时表" class="headerlink" title="十七、临时表"></a>十七、临时表</h2><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ========== MySQL ==========</span></span><br><span class="line"><span class="comment">-- 会话级临时表（连接断开自动删除）</span></span><br><span class="line"><span class="keyword">CREATE</span> TEMPORARY <span class="keyword">TABLE</span> tmp_users <span class="keyword">AS</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> status <span class="operator">=</span> <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ========== PostgreSQL ==========</span></span><br><span class="line"><span class="comment">-- 会话级临时表</span></span><br><span class="line"><span class="keyword">CREATE</span> TEMPORARY <span class="keyword">TABLE</span> tmp_users <span class="keyword">AS</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> status <span class="operator">=</span> <span class="number">1</span>;</span><br><span class="line"><span class="comment">-- 或事务级临时表（事务结束自动删除）</span></span><br><span class="line"><span class="keyword">CREATE</span> TEMPORARY <span class="keyword">TABLE</span> tmp_users <span class="keyword">ON</span> <span class="keyword">COMMIT</span> <span class="keyword">DROP</span> <span class="keyword">AS</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> status <span class="operator">=</span> <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ========== SQL Server ==========</span></span><br><span class="line"><span class="comment">-- 本地临时表（# 开头，会话级）</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">INTO</span> #tmp_users <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> status <span class="operator">=</span> <span class="number">1</span>;</span><br><span class="line"><span class="comment">-- 全局临时表（## 开头，所有会话可见）</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">INTO</span> ##tmp_users <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> status <span class="operator">=</span> <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ========== Oracle ==========</span></span><br><span class="line"><span class="comment">-- 全局临时表（结构持久，数据会话/事务级）</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">GLOBAL</span> TEMPORARY <span class="keyword">TABLE</span> tmp_users (</span><br><span class="line">    id NUMBER, name VARCHAR2(<span class="number">50</span>)</span><br><span class="line">) <span class="keyword">ON</span> <span class="keyword">COMMIT</span> <span class="keyword">DELETE</span> <span class="keyword">ROWS</span>;  <span class="comment">-- 或 ON COMMIT PRESERVE ROWS</span></span><br><span class="line"><span class="keyword">INSERT INTO</span> tmp_users <span class="keyword">SELECT</span> id, name <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> status <span class="operator">=</span> <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ========== SQLite ==========</span></span><br><span class="line"><span class="comment">-- 临时表（连接关闭删除）</span></span><br><span class="line"><span class="keyword">CREATE</span> TEMPORARY <span class="keyword">TABLE</span> tmp_users <span class="keyword">AS</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> status <span class="operator">=</span> <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="十八、Schema-库层级差异"><a href="#十八、Schema-库层级差异" class="headerlink" title="十八、Schema&#x2F;库层级差异"></a>十八、Schema&#x2F;库层级差异</h2><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- MySQL: database = schema（二者概念等价）</span></span><br><span class="line"><span class="keyword">CREATE</span> DATABASE my_app;</span><br><span class="line">USE my_app;</span><br><span class="line"><span class="keyword">CREATE TABLE</span> users (...);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- PostgreSQL: database &gt; schema（一个 database 可以包含多个 schema）</span></span><br><span class="line"><span class="keyword">CREATE</span> DATABASE my_app;</span><br><span class="line">\c my_app</span><br><span class="line"><span class="keyword">CREATE</span> SCHEMA app_data;</span><br><span class="line"><span class="keyword">CREATE TABLE</span> app_data.users (...);</span><br><span class="line"><span class="comment">-- 默认 schema 是 public，可通过 search_path 控制</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- SQL Server: database &gt; schema</span></span><br><span class="line"><span class="keyword">CREATE</span> DATABASE my_app;</span><br><span class="line">USE my_app;</span><br><span class="line"><span class="keyword">CREATE</span> SCHEMA app_data;</span><br><span class="line"><span class="keyword">CREATE TABLE</span> app_data.users (...);</span><br><span class="line"><span class="comment">-- 默认 schema 是 dbo</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- Oracle: instance &gt; schema（schema = 用户，一个用户一个 schema）</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">USER</span> app_data IDENTIFIED <span class="keyword">BY</span> password;</span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">CONNECT</span>, RESOURCE <span class="keyword">TO</span> app_data;</span><br><span class="line"><span class="keyword">CREATE TABLE</span> app_data.users (...);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- SQLite: 单文件 = 一个数据库，无 schema 概念</span></span><br><span class="line"><span class="comment">-- 但可以通过 ATTACH 同时使用多个数据库文件</span></span><br><span class="line">ATTACH DATABASE <span class="string">&#x27;other.db&#x27;</span> <span class="keyword">AS</span> other;</span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> main.users <span class="keyword">JOIN</span> other.logs <span class="keyword">ON</span> ...;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="十九、内置函数速查对照表"><a href="#十九、内置函数速查对照表" class="headerlink" title="十九、内置函数速查对照表"></a>十九、内置函数速查对照表</h2><blockquote>
+<p>以下是日常开发中最常用函数的跨库对照，建议收藏。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>功能</th>
+<th>MySQL</th>
+<th>PostgreSQL</th>
+<th>SQL Server</th>
+<th>Oracle</th>
+<th>SQLite</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>获取当前时间</td>
+<td><code>NOW()</code></td>
+<td><code>NOW()</code></td>
+<td><code>GETDATE()</code></td>
+<td><code>SYSDATE</code></td>
+<td><code>datetime(&#39;now&#39;)</code></td>
+</tr>
+<tr>
+<td>转大写</td>
+<td><code>UPPER()</code></td>
+<td><code>UPPER()</code></td>
+<td><code>UPPER()</code></td>
+<td><code>UPPER()</code></td>
+<td><code>UPPER()</code></td>
+</tr>
+<tr>
+<td>转小写</td>
+<td><code>LOWER()</code></td>
+<td><code>LOWER()</code></td>
+<td><code>LOWER()</code></td>
+<td><code>LOWER()</code></td>
+<td><code>LOWER()</code></td>
+</tr>
+<tr>
+<td>字符串拼接</td>
+<td><code>CONCAT()</code></td>
+<td><code>||</code> &#x2F; <code>CONCAT()</code></td>
+<td><code>+</code> &#x2F; <code>CONCAT()</code></td>
+<td><code>||</code></td>
+<td><code>||</code></td>
+</tr>
+<tr>
+<td>子串</td>
+<td><code>SUBSTRING()</code></td>
+<td><code>SUBSTRING()</code></td>
+<td><code>SUBSTRING()</code></td>
+<td><code>SUBSTR()</code></td>
+<td><code>SUBSTR()</code></td>
+</tr>
+<tr>
+<td>字符长度</td>
+<td><code>CHAR_LENGTH()</code></td>
+<td><code>CHAR_LENGTH()</code></td>
+<td><code>LEN()</code></td>
+<td><code>LENGTH()</code></td>
+<td><code>LENGTH()</code></td>
+</tr>
+<tr>
+<td>去空格</td>
+<td><code>TRIM()</code></td>
+<td><code>TRIM()</code></td>
+<td><code>TRIM()</code> &#x2F; <code>LTRIM()</code> &#x2F; <code>RTRIM()</code></td>
+<td><code>TRIM()</code></td>
+<td><code>TRIM()</code></td>
+</tr>
+<tr>
+<td>四舍五入</td>
+<td><code>ROUND()</code></td>
+<td><code>ROUND()</code></td>
+<td><code>ROUND()</code></td>
+<td><code>ROUND()</code></td>
+<td><code>ROUND()</code></td>
+</tr>
+<tr>
+<td>取绝对值</td>
+<td><code>ABS()</code></td>
+<td><code>ABS()</code></td>
+<td><code>ABS()</code></td>
+<td><code>ABS()</code></td>
+<td><code>ABS()</code></td>
+</tr>
+<tr>
+<td>取模</td>
+<td><code>MOD()</code> &#x2F; <code>%</code></td>
+<td><code>MOD()</code> &#x2F; <code>%</code></td>
+<td><code>%</code></td>
+<td><code>MOD()</code></td>
+<td><code>%</code></td>
+</tr>
+<tr>
+<td>随机数</td>
+<td><code>RAND()</code></td>
+<td><code>RANDOM()</code></td>
+<td><code>RAND()</code></td>
+<td><code>DBMS_RANDOM.VALUE</code></td>
+<td><code>RANDOM()</code></td>
+</tr>
+<tr>
+<td>字符串替换</td>
+<td><code>REPLACE()</code></td>
+<td><code>REPLACE()</code></td>
+<td><code>REPLACE()</code></td>
+<td><code>REPLACE()</code></td>
+<td><code>REPLACE()</code></td>
+</tr>
+<tr>
+<td>MD5</td>
+<td><code>MD5()</code></td>
+<td><code>MD5()</code> (pgcrypto)</td>
+<td><code>HASHBYTES(&#39;MD5&#39;,...)</code></td>
+<td><code>DBMS_OBFUSCATION_TOOLKIT</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>分组拼接</td>
+<td><code>GROUP_CONCAT()</code></td>
+<td><code>STRING_AGG()</code></td>
+<td><code>STRING_AGG()</code></td>
+<td><code>LISTAGG()</code></td>
+<td><code>GROUP_CONCAT()</code></td>
+</tr>
+<tr>
+<td>首行值</td>
+<td>—</td>
+<td><code>FIRST_VALUE()</code></td>
+<td><code>FIRST_VALUE()</code></td>
+<td><code>FIRST_VALUE()</code></td>
+<td><code>FIRST_VALUE()</code></td>
+</tr>
+<tr>
+<td>空值默认</td>
+<td><code>IFNULL()</code></td>
+<td><code>COALESCE()</code></td>
+<td><code>ISNULL()</code></td>
+<td><code>NVL()</code></td>
+<td><code>IFNULL()</code></td>
+</tr>
+</tbody></table>
+<h3 id="分组拼接对比（这个差异常用）"><a href="#分组拼接对比（这个差异常用）" class="headerlink" title="分组拼接对比（这个差异常用）"></a>分组拼接对比（这个差异常用）</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- MySQL:</span></span><br><span class="line"><span class="keyword">SELECT</span> dept_id, GROUP_CONCAT(name <span class="keyword">ORDER</span> <span class="keyword">BY</span> name SEPARATOR <span class="string">&#x27;, &#x27;</span>)</span><br><span class="line"><span class="keyword">FROM</span> employees <span class="keyword">GROUP</span> <span class="keyword">BY</span> dept_id;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- PostgreSQL:</span></span><br><span class="line"><span class="keyword">SELECT</span> dept_id, STRING_AGG(name, <span class="string">&#x27;, &#x27;</span> <span class="keyword">ORDER</span> <span class="keyword">BY</span> name)</span><br><span class="line"><span class="keyword">FROM</span> employees <span class="keyword">GROUP</span> <span class="keyword">BY</span> dept_id;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- SQL Server:</span></span><br><span class="line"><span class="keyword">SELECT</span> dept_id, STRING_AGG(name, <span class="string">&#x27;, &#x27;</span>) <span class="keyword">WITHIN</span> <span class="keyword">GROUP</span> (<span class="keyword">ORDER</span> <span class="keyword">BY</span> name)</span><br><span class="line"><span class="keyword">FROM</span> employees <span class="keyword">GROUP</span> <span class="keyword">BY</span> dept_id;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- Oracle:</span></span><br><span class="line"><span class="keyword">SELECT</span> dept_id, <span class="built_in">LISTAGG</span>(name, <span class="string">&#x27;, &#x27;</span>) <span class="keyword">WITHIN</span> <span class="keyword">GROUP</span> (<span class="keyword">ORDER</span> <span class="keyword">BY</span> name)</span><br><span class="line"><span class="keyword">FROM</span> employees <span class="keyword">GROUP</span> <span class="keyword">BY</span> dept_id;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- SQLite:</span></span><br><span class="line"><span class="keyword">SELECT</span> dept_id, GROUP_CONCAT(name, <span class="string">&#x27;, &#x27;</span>)</span><br><span class="line"><span class="keyword">FROM</span> employees <span class="keyword">GROUP</span> <span class="keyword">BY</span> dept_id;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="二十、跨数据库开发建议"><a href="#二十、跨数据库开发建议" class="headerlink" title="二十、跨数据库开发建议"></a>二十、跨数据库开发建议</h2><h3 id="20-1-能统一的写法"><a href="#20-1-能统一的写法" class="headerlink" title="20.1 能统一的写法"></a>20.1 能统一的写法</h3><p>以下语法在五大数据库中都通用，优先使用：</p>
+<ul>
+<li><code>SELECT ... FROM ... WHERE ... JOIN ... ON ... GROUP BY ... HAVING ... ORDER BY</code></li>
+<li><code>CASE WHEN ... THEN ... ELSE ... END</code></li>
+<li><code>COALESCE()</code>、<code>NULLIF()</code></li>
+<li><code>CAST(expr AS type)</code></li>
+<li><code>ROW_NUMBER() OVER (...)</code></li>
+<li><code>INNER JOIN</code> &#x2F; <code>LEFT JOIN</code></li>
+<li><code>CREATE INDEX</code>、<code>DROP TABLE</code>、<code>TRUNCATE TABLE</code></li>
+<li><code>EXISTS</code> &#x2F; <code>IN</code> 子查询</li>
+</ul>
+<h3 id="20-2-必须隔离的写法"><a href="#20-2-必须隔离的写法" class="headerlink" title="20.2 必须隔离的写法"></a>20.2 必须隔离的写法</h3><p>以下需要为不同数据库写不同的 SQL，建议放在 ORM 层或独立的 SQL 模板中：</p>
+<ul>
+<li><strong>分页查询</strong>（<code>LIMIT</code> vs <code>TOP</code> vs <code>ROWNUM</code> vs <code>FETCH</code>）</li>
+<li><strong>自增主键</strong>（<code>AUTO_INCREMENT</code> vs <code>SERIAL</code> vs <code>IDENTITY</code>）</li>
+<li><strong>UPSERT</strong>（<code>ON DUPLICATE KEY</code> vs <code>ON CONFLICT</code> vs <code>MERGE</code>）</li>
+<li><strong>获取当前时间</strong>（<code>NOW()</code> vs <code>GETDATE()</code> vs <code>SYSDATE</code>）</li>
+<li><strong>布尔值</strong>（<code>TINYINT(1)</code> vs <code>BOOLEAN</code> vs <code>BIT</code>）</li>
+<li><strong>限制返回行数</strong>（<code>LIMIT</code> vs <code>FETCH FIRST</code> vs <code>TOP</code>）</li>
+<li><strong>标识符引用符</strong>（<code>`</code> vs <code>&quot;</code> vs <code>[]</code>）</li>
+</ul>
+<h3 id="20-3-迁移时的常见坑"><a href="#20-3-迁移时的常见坑" class="headerlink" title="20.3 迁移时的常见坑"></a>20.3 迁移时的常见坑</h3><ol>
+<li><strong>隐式类型转换</strong>：MySQL 宽松，Oracle&#x2F;PostgreSQL 严格，迁移后很多查询会报错</li>
+<li><strong>NULL 排序</strong>：MySQL 默认 NULL 最小（ASC 时在前），Oracle 默认 NULL 最大（ASC 时在后），PostgreSQL 用 <code>NULLS FIRST/LAST</code> 显式控制</li>
+<li><strong>空字符串 vs NULL</strong>：Oracle 将空字符串视为 NULL，MySQL 区分二者</li>
+<li><strong>标识符大小写</strong>：MySQL 区分取决于 OS，PostgreSQL 默认全转小写，Oracle 默认全转大写</li>
+<li><strong>DML 提交</strong>：MySQL 默认自动提交，Oracle 必须手动 COMMIT，PostgreSQL 自动提交</li>
+<li><strong>索引名全局性</strong>：MySQL 索引名在表内唯一，其他数据库在 Schema 内唯一</li>
+</ol>
+<hr>
+<h2 id="附录：线上快速测试各数据库"><a href="#附录：线上快速测试各数据库" class="headerlink" title="附录：线上快速测试各数据库"></a>附录：线上快速测试各数据库</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># MySQL</span></span><br><span class="line">docker run -d --name mysql-test -e MYSQL_ROOT_PASSWORD=root -p 3306:3306 mysql:8</span><br><span class="line"></span><br><span class="line"><span class="comment"># PostgreSQL</span></span><br><span class="line">docker run -d --name pg-test -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres:16</span><br><span class="line"></span><br><span class="line"><span class="comment"># SQL Server</span></span><br><span class="line">docker run -d --name mssql-test -e <span class="string">&#x27;ACCEPT_EULA=Y&#x27;</span> -e <span class="string">&#x27;SA_PASSWORD=YourPass123&#x27;</span> -p 1433:1433 mcr.microsoft.com/mssql/server:2022-latest</span><br><span class="line"></span><br><span class="line"><span class="comment"># Oracle (需要较大内存)</span></span><br><span class="line">docker run -d --name oracle-test -e ORACLE_PASSWORD=oracle -p 1521:1521 gvenzl/oracle-xe:21</span><br><span class="line"></span><br><span class="line"><span class="comment"># SQLite（无需 Docker）</span></span><br><span class="line">sqlite3 test.db</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p><em>本文覆盖了五大主流关系型数据库在日常开发中最常见的语法差异。建议收藏作为跨数据库开发的速查手册，在技术选型、系统迁移、多数据库适配等场景下快速检索。</em></p>
+]]></content>
+      <categories>
+        <category>后端开发</category>
+      </categories>
+      <tags>
+        <tag>MySQL</tag>
+        <tag>数据库</tag>
+        <tag>PostgreSQL</tag>
+        <tag>SQL Server</tag>
+        <tag>Oracle</tag>
+        <tag>SQLite</tag>
+        <tag>SQL</tag>
+      </tags>
+  </entry>
 </search>
