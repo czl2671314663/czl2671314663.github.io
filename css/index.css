@@ -1371,7 +1371,7 @@ body {
   background: var(--global-bg);
   color: var(--font-color);
   font-size: var(--global-font-size);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Lato, Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-family: 'LXGW WenKai', '霞鹜文楷', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
   line-height: 2;
   -webkit-tap-highlight-color: rgba(0,0,0,0);
   scroll-behavior: smooth;
@@ -1484,6 +1484,13 @@ a {
 }
 a:hover {
   color: #49b1f5;
+}
+#site-title,
+#site-subtitle,
+.site-name,
+#aside-content .author-info-name,
+#aside-content .author-info-description {
+  font-family: 'LXGW WenKai', '霞鹜文楷', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
 }
 .text-center {
   text-align: center;
@@ -1653,7 +1660,7 @@ figure.highlight pre .javascript .function {
 .container pre,
 .container code {
   font-size: var(--global-font-size);
-  font-family: consolas, Menlo, monospace, 'PingFang SC', 'Microsoft YaHei', sans-serif !important;
+  font-family: 'LXGW WenKai Mono', '霞鹜文楷等宽', Consolas, 'Courier New', monospace !important;
   border-radius: 6px;
 }
 .container code {
@@ -4450,7 +4457,7 @@ figure.highlight pre .javascript .function {
   -o-animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   -ms-animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  max-width: 320px;
+  max-width: 420px;
   width: 90%;
 }
 .post-reward .qr-popup .qr-card .qr-close {
@@ -4476,21 +4483,47 @@ figure.highlight pre .javascript .function {
   color: #333;
   margin-bottom: 6px;
 }
-.post-reward .qr-popup .qr-card .qr-code-img {
-  width: 200px;
-  height: 200px;
+.post-reward .qr-popup .qr-card .qr-code-list {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: box;
+  display: flex;
+  gap: 20px;
+  -webkit-box-pack: center;
+  -moz-box-pack: center;
+  -o-box-pack: center;
+  -ms-flex-pack: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  -webkit-box-lines: multiple;
+  -moz-box-lines: multiple;
+  -o-box-lines: multiple;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.post-reward .qr-popup .qr-card .qr-code-item {
+  text-align: center;
+}
+.post-reward .qr-popup .qr-card .qr-code-item .qr-code-img {
+  width: 150px;
+  height: 150px;
   border-radius: 8px;
   border: 1px solid #eee;
+}
+.post-reward .qr-popup .qr-card .qr-code-item .qr-hint {
+  font-size: 12px;
+  color: #999;
+  margin-top: 4px;
 }
 .post-reward .qr-popup .qr-card .qr-amount {
   font-size: 24px;
   font-weight: bold;
   color: #f76b1c;
   margin: 8px 0;
-}
-.post-reward .qr-popup .qr-card .qr-hint {
-  font-size: 13px;
-  color: #999;
 }
 @-moz-keyframes slideDown {
   from {
